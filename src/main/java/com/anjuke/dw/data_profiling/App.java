@@ -27,8 +27,22 @@ public class App {
         String statsJson;
 
         Map<String, Map<String, Object>> stats = new HashMap<String, Map<String, Object>>();
+        Map<String, Object> generalStats = new HashMap<String, Object>();
 
         // numeric: toward
+        stats.clear();
+        generalStats.clear();
+        stats.put("general", generalStats);
+        stmt = connStage.prepareStatement("SELECT COUNT(*) FROM st_dw_haozu_prop WHERE toward IS NULL");
+        result = stmt.executeQuery();
+        result.next();
+        generalStats.put("null", result.getLong(1));
+
+        stmt = connStage.prepareStatement("SELECT COUNT(DISTINCT toward) FROM st_dw_haozu_prop");
+        result = stmt.executeQuery();
+        result.next();
+        generalStats.put("distinct", result.getLong(1));
+
         Map<String, Object> numericStats = new HashMap<String, Object>();
         stats.put("numeric", numericStats);
 
@@ -66,8 +80,20 @@ public class App {
         stmtStats.executeUpdate();
 
         // string: comm_name
-        Map<String, Object> stringStats = new HashMap<String, Object>();
         stats.clear();
+        generalStats.clear();
+        stats.put("general", generalStats);
+        stmt = connStage.prepareStatement("SELECT COUNT(*) FROM st_dw_haozu_prop WHERE comm_name IS NULL OR comm_name = ''");
+        result = stmt.executeQuery();
+        result.next();
+        generalStats.put("null", result.getLong(1));
+
+        stmt = connStage.prepareStatement("SELECT COUNT(DISTINCT comm_name) FROM st_dw_haozu_prop");
+        result = stmt.executeQuery();
+        result.next();
+        generalStats.put("distinct", result.getLong(1));
+
+        Map<String, Object> stringStats = new HashMap<String, Object>();
         stats.put("string", stringStats);
 
         stmt = connStage.prepareStatement("SELECT MIN(LENGTH(comm_name)), MAX(LENGTH(comm_name)), AVG(LENGTH(comm_name)) FROM st_dw_haozu_prop");
@@ -85,8 +111,20 @@ public class App {
         stmtStats.executeUpdate();
 
         // datetime: created_time
-        Map<String, Object> datetimeStats = new HashMap<String, Object>();
         stats.clear();
+        generalStats.clear();
+        stats.put("general", generalStats);
+        stmt = connStage.prepareStatement("SELECT COUNT(*) FROM st_dw_haozu_prop WHERE created_time IS NULL OR created_time = '0000-00-00 00:00:00'");
+        result = stmt.executeQuery();
+        result.next();
+        generalStats.put("null", result.getLong(1));
+
+        stmt = connStage.prepareStatement("SELECT COUNT(DISTINCT created_time) FROM st_dw_haozu_prop");
+        result = stmt.executeQuery();
+        result.next();
+        generalStats.put("distinct", result.getLong(1));
+
+        Map<String, Object> datetimeStats = new HashMap<String, Object>();
         stats.put("datetime", datetimeStats);
 
         stmt = connStage.prepareStatement("SELECT MIN(created_time), MAX(created_time) FROM st_dw_haozu_prop");
