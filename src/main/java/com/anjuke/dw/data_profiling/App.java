@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,40 +14,93 @@ import org.json.simple.JSONValue;
 
 public class App {
 
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     public static void main(String[] args) throws Exception {
 
         Connection connStats = DriverManager.getConnection("jdbc:mysql://localhost/dwms_db?useUnicode=true&characterEncoding=UTF-8", "dwms_db", "dwms_db");
-        PreparedStatement stmtStats = connStats.prepareStatement("UPDATE dp_column SET stats = ? WHERE table_id = 1 AND name = 'toward'");
+        PreparedStatement stmtStats = connStats.prepareStatement("UPDATE dp_column SET stats = ? WHERE table_id = 1 AND name = ?");
 
         Connection connStage = DriverManager.getConnection("jdbc:mysql://10.20.8.39:3306/dw_stage?useUnicode=true&characterEncoding=UTF-8", "readonly_v2", "aNjuKe9dx1Pdw");
+        PreparedStatement stmt;
+        ResultSet result;
+        String statsJson;
 
-        PreparedStatement stmt = connStage.prepareStatement("SELECT MIN(toward), MAX(toward), AVG(toward), STDDEV_POP(toward) FROM st_dw_haozu_prop");
-        ResultSet result = stmt.executeQuery();
+        Map<String, Map<String, Object>> stats = new HashMap<String, Map<String, Object>>();
+
+        // numeric: toward
+        Map<String, Object> numericStats = new HashMap<String, Object>();
+        stats.put("numeric", numericStats);
+
+        stmt = connStage.prepareStatement("SELECT MIN(toward), MAX(toward), AVG(toward), STDDEV_POP(toward) FROM st_dw_haozu_prop");
+        result = stmt.executeQuery();
         result.next();
+        numericStats.put("min", result.getDouble(1));
+        numericStats.put("max", result.getDouble(2));
+        numericStats.put("avg", result.getDouble(3));
+        numericStats.put("sd", result.getDouble(4));
 
-        Map<String, Object> stats = new HashMap<String, Object>();
-        stats.put("min", result.getDouble(1));
-        stats.put("max", result.getDouble(2));
-        stats.put("avg", result.getDouble(3));
-        stats.put("sd", result.getDouble(4));
-
-        stmt.close();
         stmt = connStage.prepareStatement("SELECT toward, COUNT(*) FROM st_dw_haozu_prop GROUP BY toward ORDER BY COUNT(*) DESC LIMIT 10");
         result = stmt.executeQuery();
-
         List<Object> top10 = new ArrayList<Object>();
         while (result.next()) {
             top10.add(result.getObject(1));
             top10.add(result.getLong(2));
         }
-        stats.put("top10", top10);
+        numericStats.put("top10", top10);
 
-        String statsString = JSONValue.toJSONString(stats);
-        System.out.println(statsString);
+        stmt = connStage.prepareStatement("SELECT toward, COUNT(*) FROM st_dw_haozu_prop GROUP BY toward ORDER BY COUNT(*) LIMIT 10");
+        result = stmt.executeQuery();
+        List<Object> bottom10 = new ArrayList<Object>();
+        while (result.next()) {
+            bottom10.add(result.getObject(1));
+            bottom10.add(result.getLong(2));
+        }
+        numericStats.put("bottom10", bottom10);
 
-        stmtStats.setString(1, statsString);
-        int affectedRows = stmtStats.executeUpdate();
-        System.out.println("Affected rows: " + String.valueOf(affectedRows));
+        statsJson = JSONValue.toJSONString(stats);
+        System.out.println(statsJson);
+
+        stmtStats.setString(1, statsJson);
+        stmtStats.setString(2, "toward");
+        stmtStats.executeUpdate();
+
+        // string: comm_name
+        Map<String, Object> stringStats = new HashMap<String, Object>();
+        stats.clear();
+        stats.put("string", stringStats);
+
+        stmt = connStage.prepareStatement("SELECT MIN(LENGTH(comm_name)), MAX(LENGTH(comm_name)), AVG(LENGTH(comm_name)) FROM st_dw_haozu_prop");
+        result = stmt.executeQuery();
+        result.next();
+        stringStats.put("min_length", result.getInt(1));
+        stringStats.put("max_length", result.getInt(2));
+        stringStats.put("avg_length", result.getInt(3));
+
+        statsJson = JSONValue.toJSONString(stats);
+        System.out.println(statsJson);
+
+        stmtStats.setString(1, statsJson);
+        stmtStats.setString(2, "comm_name");
+        stmtStats.executeUpdate();
+
+        // datetime: created_time
+        Map<String, Object> datetimeStats = new HashMap<String, Object>();
+        stats.clear();
+        stats.put("datetime", datetimeStats);
+
+        stmt = connStage.prepareStatement("SELECT MIN(created_time), MAX(created_time) FROM st_dw_haozu_prop");
+        result = stmt.executeQuery();
+        result.next();
+        datetimeStats.put("min", dateFormat.format(result.getTimestamp(1)));
+        datetimeStats.put("max", dateFormat.format(result.getTimestamp(2)));
+
+        statsJson = JSONValue.toJSONString(stats);
+        System.out.println(statsJson);
+
+        stmtStats.setString(1,  statsJson);
+        stmtStats.setString(2, "created_time");
+        stmtStats.executeUpdate();
 
     }
 
