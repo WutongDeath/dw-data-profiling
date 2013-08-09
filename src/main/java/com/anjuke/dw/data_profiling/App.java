@@ -14,7 +14,9 @@ import org.json.simple.JSONValue;
 
 public class App {
 
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static SimpleDateFormat dfDatetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static SimpleDateFormat dfDate = new SimpleDateFormat("yyyy-MM-dd");
+    private static SimpleDateFormat dfTime = new SimpleDateFormat("HH:mm:ss");
 
     public static void main(String[] args) throws Exception {
 
@@ -83,7 +85,7 @@ public class App {
         stats.clear();
         generalStats.clear();
         stats.put("general", generalStats);
-        stmt = connStage.prepareStatement("SELECT COUNT(*) FROM st_dw_haozu_prop WHERE comm_name IS NULL OR comm_name = ''");
+        stmt = connStage.prepareStatement("SELECT COUNT(*) FROM st_dw_haozu_prop WHERE comm_name IS NULL OR TRIM(comm_name) = ''");
         result = stmt.executeQuery();
         result.next();
         generalStats.put("null", result.getLong(1));
@@ -127,11 +129,27 @@ public class App {
         Map<String, Object> datetimeStats = new HashMap<String, Object>();
         stats.put("datetime", datetimeStats);
 
-        stmt = connStage.prepareStatement("SELECT MIN(created_time), MAX(created_time) FROM st_dw_haozu_prop");
+        stmt = connStage.prepareStatement("SELECT MIN(created_time), MAX(created_time)," +
+                                          "       MIN(DATE(created_time)), MAX(DATE(created_time))," +
+                                          "       MIN(TIME(created_time)), MAX(TIME(created_time)) " +
+                                          "FROM st_dw_haozu_prop");
         result = stmt.executeQuery();
         result.next();
-        datetimeStats.put("min", dateFormat.format(result.getTimestamp(1)));
-        datetimeStats.put("max", dateFormat.format(result.getTimestamp(2)));
+        datetimeStats.put("min", dfDatetime.format(result.getTimestamp(1)));
+        datetimeStats.put("max", dfDatetime.format(result.getTimestamp(2)));
+        datetimeStats.put("min_date", dfDate.format(result.getDate(3)));
+        datetimeStats.put("max_date", dfDate.format(result.getDate(4)));
+        datetimeStats.put("min_time", dfTime.format(result.getTime(5)));
+        datetimeStats.put("max_time", dfTime.format(result.getTime(6)));
+
+        stmt = connStage.prepareStatement("SELECT DATE(created_time), COUNT(*) FROM st_dw_haozu_prop GROUP BY DATE(created_time) ORDER BY COUNT(*) DESC LIMIT 10");
+        result = stmt.executeQuery();
+        List<Object> datetimeTop10 = new ArrayList<Object>();
+        while (result.next()) {
+            datetimeTop10.add(result.getObject(1));
+            datetimeTop10.add(result.getLong(2));
+        }
+        datetimeStats.put("top10", datetimeTop10);
 
         statsJson = JSONValue.toJSONString(stats);
         System.out.println(statsJson);
