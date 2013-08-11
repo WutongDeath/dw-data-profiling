@@ -1,4 +1,4 @@
-package com.anjuke.dw.data_profiling;
+package com.anjuke.dw.data_profiling.job;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,9 +14,9 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONValue;
 
-public class App implements Runnable {
+public class Builder implements Runnable {
 
-    private Logger logger = Logger.getLogger(App.class);
+    private Logger logger = Logger.getLogger(Builder.class);
 
     private Connection connStats;
 
@@ -391,7 +391,7 @@ public class App implements Runnable {
     }
 
     public static void main(String[] args) throws Exception {
-        new App().run();
+        new Builder().run();
     }
 
 }
