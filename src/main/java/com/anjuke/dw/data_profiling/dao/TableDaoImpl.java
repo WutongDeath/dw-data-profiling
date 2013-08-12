@@ -2,6 +2,7 @@ package com.anjuke.dw.data_profiling.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -21,6 +22,14 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
         } catch (IncorrectResultSizeDataAccessException e) {
             return null;
         }
+    }
+
+    @Override
+    public List<Table> findByConnectionId(int connectionId) throws DataAccessException {
+        return getJdbcTemplate().query(
+                "SELECT id, connection_id, name, status, row_count, data_length, updated FROM dp_table WHERE connection_id = ? ORDER BY id",
+                rowMapper, connectionId);
+
     }
 
     private RowMapper<Table> rowMapper = new RowMapper<Table>() {

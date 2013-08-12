@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.anjuke.dw.data_profiling.dao.ColumnDao;
+import com.anjuke.dw.data_profiling.dao.ConnectionDao;
 import com.anjuke.dw.data_profiling.dao.TableDao;
 import com.anjuke.dw.data_profiling.model.Column;
+import com.anjuke.dw.data_profiling.model.Connection;
 import com.anjuke.dw.data_profiling.model.Table;
 import com.anjuke.dw.data_profiling.util.ResourceNotFoundException;
 
@@ -39,6 +41,9 @@ public class TableController {
     private Logger logger = Logger.getLogger(TableController.class);
 
     @Autowired
+    private ConnectionDao connectionDao;
+
+    @Autowired
     private TableDao tableDao;
 
     @Autowired
@@ -49,6 +54,11 @@ public class TableController {
 
         Table table = tableDao.findById(tableId);
         if (table == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        Connection connection = connectionDao.findById(table.getConnectionId());
+        if (connection == null) {
             throw new ResourceNotFoundException();
         }
 
@@ -106,6 +116,7 @@ public class TableController {
             columnList.add(m);
         }
 
+        model.addAttribute("connection", connection);
         model.addAttribute("table", table);
         model.addAttribute("columnList", columnList);
         model.addAttribute("typeFlagMap", typeFlagMap);
@@ -188,6 +199,22 @@ public class TableController {
         model.addAttribute("typeFlagMap", typeFlagMap);
 
         return "table/column";
+    }
+
+    @RequestMapping("/list/{connectionId}")
+    public String list(@PathVariable int connectionId, ModelMap model) {
+
+        Connection connection = connectionDao.findById(connectionId);
+        if (connection == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        List<Table> tableList = tableDao.findByConnectionId(connectionId);
+
+        model.addAttribute("connection", connection);
+        model.addAttribute("tableList", tableList);
+
+        return "table/list";
     }
 
 }

@@ -8,12 +8,14 @@
         <th>Name</th>
         <th>JDBC Url</th>
         <th>Username</th>
+        <th>Password</th>
       <tr>
       <c:forEach var="connection" items="${connectionList}">
       <tr>
         <td><a href="/table/list/${connection.id}">${connection.name}</a></td>
         <td>jdbc:mysql://${connection.host}:${connection.port}/${connection.database}</td>
         <td>${connection.username}</td>
+        <td>******</td>
       </tr>
       </c:forEach>
     </table>

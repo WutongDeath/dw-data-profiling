@@ -3,12 +3,12 @@
 <%@ taglib uri="/functions" prefix="f" %>
 <html>
   <body>
-    <h1>Table: ${table.name}</h1>
+    <h1>Column: ${column.name} (Table: <a href="/table/view/${table.id}">${table.name}</a>)</h1>
 
     <h2>General Information:</h2>
     <table border="1">
       <tr>
-        <th>Column Nmae</th>
+        <th>Column Name</th>
         <th>Data Type</th>
         <th>Row Count</th>
         <th>Null Count</th>
