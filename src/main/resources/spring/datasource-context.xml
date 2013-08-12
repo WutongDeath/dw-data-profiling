@@ -15,6 +15,9 @@
         p:jdbcUrl="${jdbc.stats.url}" p:user="${jdbc.stats.username}"
         p:password="${jdbc.stats.password}" />
 
+    <bean id="databaseDao" class="com.anjuke.dw.data_profiling.dao.ConnectionDaoImpl"
+        p:dataSource-ref="statsDataSource" />
+
     <bean id="tableDao" class="com.anjuke.dw.data_profiling.dao.TableDaoImpl"
         p:dataSource-ref="statsDataSource" />
 

@@ -45,7 +45,7 @@ public class TableController {
     private ColumnDao columnDao;
 
     @RequestMapping("/view/{tableId}")
-    public String index(@PathVariable int tableId, ModelMap model) {
+    public String view(@PathVariable int tableId, ModelMap model) {
 
         Table table = tableDao.findById(tableId);
         if (table == null) {
