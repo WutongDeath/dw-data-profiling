@@ -41,7 +41,7 @@
         <td>${column.max}</td>
         <td>${column.avg}</td>
         <td>${column.sd}</td>
-        <td>&nbsp;</td>
+        <td><a href="/table/column/${column.id}">Detail</a></td>
       </tr>
       </c:forEach>
     </table>

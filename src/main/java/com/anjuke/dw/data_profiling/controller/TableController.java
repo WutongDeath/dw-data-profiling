@@ -30,9 +30,9 @@ public class TableController {
 
     static {
         typeFlagMap = new LinkedHashMap<Integer, String>();
-        typeFlagMap.put(1, "Numeric");
-        typeFlagMap.put(2, "String");
-        typeFlagMap.put(4, "Datetime");
+        typeFlagMap.put(1, "Num");
+        typeFlagMap.put(2, "Str");
+        typeFlagMap.put(4, "Date");
     }
 
     private JSONParser parser = new JSONParser();
@@ -110,7 +110,84 @@ public class TableController {
         model.addAttribute("columnList", columnList);
         model.addAttribute("typeFlagMap", typeFlagMap);
 
-        return "table";
+        return "table/view";
+    }
+
+    @RequestMapping("/column/{columnId}")
+    public String column(@PathVariable int columnId, ModelMap model) {
+
+        Column column = columnDao.findById(columnId);
+        if (column == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        Table table = tableDao.findById(column.getTableId());
+        if (table == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        Column c = column;
+
+        JSONObject stats = null;
+        try {
+            stats = (JSONObject) parser.parse(c.getStats());
+        } catch (ParseException e) {
+            logger.warn("Invalid column stats.", e);
+            return "redirect:/table/view/" + table.getId();
+        }
+
+        // general
+        Map<String, Object> generalStatsMap = new HashMap<String, Object>();
+        model.addAttribute("generalStats", generalStatsMap);
+
+        JSONObject generalStats = (JSONObject) stats.get("general");
+        Long nullCount = (Long) generalStats.get("null");
+        generalStatsMap.put("nullCount", nullCount);
+        generalStatsMap.put("nullPercent", String.format("%.2f", nullCount * 100.0 / table.getRowCount()));
+        generalStatsMap.put("distinctValues", (Long) generalStats.get("distinct"));
+
+        if ((c.getTypeFlag() & 1) == 1) { // numeric
+
+            Map<String, Object> numericStatsMap = new HashMap<String, Object>();
+            model.addAttribute("numericStats", numericStatsMap);
+
+            JSONObject numericStats = (JSONObject) stats.get("numeric");
+            numericStatsMap.put("min", (Double) numericStats.get("min"));
+            numericStatsMap.put("max", (Double) numericStats.get("max"));
+            numericStatsMap.put("avg", (Double) numericStats.get("avg"));
+            numericStatsMap.put("sd", (Double) numericStats.get("sd"));
+
+
+        }
+
+        if ((c.getTypeFlag() & 2) == 2) { // string
+
+            Map<String, Object> stringStatsMap = new HashMap<String, Object>();
+            model.addAttribute("stringStats", stringStatsMap);
+
+            JSONObject stringStats = (JSONObject) stats.get("string");
+            stringStatsMap.put("minLength", (Long) stringStats.get("min_length"));
+            stringStatsMap.put("maxLength", (Long) stringStats.get("max_length"));
+            stringStatsMap.put("avgLength", (Long) stringStats.get("avg_length"));
+
+        }
+
+        if ((c.getTypeFlag() & 4) == 4) { // datetime
+
+            Map<String, Object> datetimeStatsMap = new HashMap<String, Object>();
+            model.addAttribute("datetimeStats", datetimeStatsMap);
+
+            JSONObject datetimeStats = (JSONObject) stats.get("datetime");
+            datetimeStatsMap.put("min", (String) datetimeStats.get("min"));
+            datetimeStatsMap.put("max", (String) datetimeStats.get("max"));
+
+        }
+
+        model.addAttribute("table", table);
+        model.addAttribute("column", column);
+        model.addAttribute("typeFlagMap", typeFlagMap);
+
+        return "table/column";
     }
 
 }

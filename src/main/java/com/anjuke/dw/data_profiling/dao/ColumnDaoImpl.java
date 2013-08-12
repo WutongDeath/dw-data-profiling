@@ -5,12 +5,24 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
 import com.anjuke.dw.data_profiling.model.Column;
 
 public class ColumnDaoImpl extends JdbcDaoSupport implements ColumnDao {
+
+    @Override
+    public Column findById(int id) throws DataAccessException {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "SELECT id, table_id, name, type, type_flag, stats, updated FROM dp_column WHERE id = ?",
+                    rowMapper, id);
+        } catch (IncorrectResultSizeDataAccessException e) {
+            return null;
+        }
+    }
 
     @Override
     public List<Column> findByTableId(int tableId) throws DataAccessException {
