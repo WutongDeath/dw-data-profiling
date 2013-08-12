@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
@@ -13,9 +14,13 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
 
     @Override
     public Table findById(int id) throws DataAccessException {
-        return getJdbcTemplate().queryForObject(
-                "SELECT id, connection_id, name, status, row_count, data_length, updated FROM dp_table WHERE id = ?",
-                new Object[] { id }, rowMapper);
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "SELECT id, connection_id, name, status, row_count, data_length, updated FROM dp_table WHERE id = ?",
+                    rowMapper, id);
+        } catch (IncorrectResultSizeDataAccessException e) {
+            return null;
+        }
     }
 
     private RowMapper<Table> rowMapper = new RowMapper<Table>() {

@@ -9,7 +9,7 @@ public class HomeController {
 
     @RequestMapping("/")
     public String index(ModelMap model) {
-        return "redirect:/table";
+        return "redirect:/connection/list";
     }
 
 }

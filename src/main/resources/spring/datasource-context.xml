@@ -18,4 +18,7 @@
     <bean id="tableDao" class="com.anjuke.dw.data_profiling.dao.TableDaoImpl"
         p:dataSource-ref="statsDataSource" />
 
+    <bean id="columnDao" class="com.anjuke.dw.data_profiling.dao.ColumnDaoImpl"
+        p:dataSource-ref="statsDataSource" />
+
 </beans>
