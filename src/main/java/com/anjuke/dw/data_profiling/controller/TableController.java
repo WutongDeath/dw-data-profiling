@@ -1,6 +1,10 @@
 package com.anjuke.dw.data_profiling.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,6 +22,15 @@ import com.anjuke.dw.data_profiling.util.ResourceNotFoundException;
 @RequestMapping("/table")
 public class TableController {
 
+    private static final Map<Integer, String> typeFlagMap;
+
+    static {
+        typeFlagMap = new LinkedHashMap<Integer, String>();
+        typeFlagMap.put(1, "Numeric");
+        typeFlagMap.put(2, "String");
+        typeFlagMap.put(4, "Datetime");
+    }
+
     @Autowired
     private TableDao tableDao;
 
@@ -32,13 +45,20 @@ public class TableController {
             throw new ResourceNotFoundException();
         }
 
-        List<Column> columnList = columnDao.findByTableId(tableId);
-        if (columnList.size() == 0) {
-            throw new ResourceNotFoundException();
+        List<Map<String, Object>> columnList = new ArrayList<Map<String, Object>>();
+        for (Column c : columnDao.findByTableId(tableId)) {
+            Map<String, Object> m = new HashMap<String, Object>();
+            m.put("id", c.getId());
+            m.put("name", c.getName());
+            m.put("type", c.getType());
+            m.put("typeFlag", c.getTypeFlag());
+
+            columnList.add(m);
         }
 
         model.addAttribute("table", table);
         model.addAttribute("columnList", columnList);
+        model.addAttribute("typeFlagMap", typeFlagMap);
 
         return "table";
     }
