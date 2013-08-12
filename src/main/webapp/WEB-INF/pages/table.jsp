@@ -34,6 +34,14 @@
           </label>
           </c:forEach>
         </td>
+        <td>${column.nullCount}</td>
+        <td>${column.nullPercent}</td>
+        <td>${column.distinctValues}</td>
+        <td>${column.min}</td>
+        <td>${column.max}</td>
+        <td>${column.avg}</td>
+        <td>${column.sd}</td>
+        <td>&nbsp;</td>
       </tr>
       </c:forEach>
     </table>
