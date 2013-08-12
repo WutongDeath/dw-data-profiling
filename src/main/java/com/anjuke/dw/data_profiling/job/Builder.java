@@ -126,7 +126,7 @@ public class Builder implements Runnable {
             ResultSet rsConnection = stmtConnection.executeQuery();
             rsConnection.next();
             connTarget = DriverManager.getConnection(
-                    String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=UTF-8",
+                    String.format("jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull",
                             rsConnection.getString(1), rsConnection.getInt(2), rsConnection.getString(5)),
                     rsConnection.getString(3), rsConnection.getString(4));
         } catch (SQLException e) {
@@ -158,6 +158,11 @@ public class Builder implements Runnable {
             }
         } catch (SQLException e) {
             logger.error("Unable to update table status.");
+            return false;
+        }
+
+        if (rows == 0) {
+            logger.warn("Table is empty.");
             return false;
         }
 
@@ -236,7 +241,7 @@ public class Builder implements Runnable {
                 result = stmt.executeQuery();
                 List<Object> numericTop10 = new ArrayList<Object>();
                 while (result.next()) {
-                    numericTop10.add(result.getObject(1));
+                    numericTop10.add(result.getString(1));
                     numericTop10.add(result.getLong(2));
                 }
                 numericStats.put("top10", numericTop10);
@@ -247,7 +252,7 @@ public class Builder implements Runnable {
                 result = stmt.executeQuery();
                 List<Object> numericBottom10 = new ArrayList<Object>();
                 while (result.next()) {
-                    numericBottom10.add(result.getObject(1));
+                    numericBottom10.add(result.getString(1));
                     numericBottom10.add(result.getLong(2));
                 }
                 numericStats.put("bottom10", numericBottom10);
@@ -275,7 +280,7 @@ public class Builder implements Runnable {
                 result = stmt.executeQuery();
                 List<Object> stringTop10 = new ArrayList<Object>();
                 while (result.next()) {
-                    stringTop10.add(result.getObject(1));
+                    stringTop10.add(result.getString(1));
                     stringTop10.add(result.getLong(2));
                 }
                 stringStats.put("top10", stringTop10);
@@ -286,7 +291,7 @@ public class Builder implements Runnable {
                 result = stmt.executeQuery();
                 List<Object> stringBottom10 = new ArrayList<Object>();
                 while (result.next()) {
-                    stringBottom10.add(result.getObject(1));
+                    stringBottom10.add(result.getString(1));
                     stringBottom10.add(result.getLong(2));
                 }
                 stringStats.put("bottom10", stringBottom10);
@@ -300,8 +305,8 @@ public class Builder implements Runnable {
                 stats.put("datetime", datetimeStats);
 
                 stmt = connTarget.prepareStatement(
-                        String.format("SELECT MIN(%s), MAX(%s), MIN(DATE(%s)), MAX(DATE(%s)), MIN(TIME(%s)), MAX(TIME(%s)) FROM %s",
-                                column.name, column.name, column.name, column.name, column.name, column.name, tableName));
+                        String.format("SELECT MIN(%s), MAX(%s), MIN(DATE(%s)), MAX(DATE(%s)), MIN(TIME(%s)), MAX(TIME(%s)) FROM %s WHERE %s != '0000-00-00 00:00:00'",
+                                column.name, column.name, column.name, column.name, column.name, column.name, tableName, column.name));
                 result = stmt.executeQuery();
                 result.next();
                 datetimeStats.put("min", dfDatetime.format(result.getTimestamp(1)));
@@ -317,7 +322,7 @@ public class Builder implements Runnable {
                 result = stmt.executeQuery();
                 List<Object> datetimeTop10 = new ArrayList<Object>();
                 while (result.next()) {
-                    datetimeTop10.add(result.getObject(1));
+                    datetimeTop10.add(result.getString(1));
                     datetimeTop10.add(result.getLong(2));
                 }
                 datetimeStats.put("top10", datetimeTop10);
@@ -328,7 +333,7 @@ public class Builder implements Runnable {
                 result = stmt.executeQuery();
                 List<Object> datetimeBottom10 = new ArrayList<Object>();
                 while (result.next()) {
-                    datetimeBottom10.add(result.getObject(1));
+                    datetimeBottom10.add(result.getString(1));
                     datetimeBottom10.add(result.getLong(2));
                 }
                 datetimeStats.put("bottom10", datetimeBottom10);
