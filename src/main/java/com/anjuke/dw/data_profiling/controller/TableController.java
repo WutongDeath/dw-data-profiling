@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -13,12 +15,16 @@ import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.anjuke.dw.data_profiling.dao.ColumnDao;
 import com.anjuke.dw.data_profiling.dao.ConnectionDao;
 import com.anjuke.dw.data_profiling.dao.TableDao;
+import com.anjuke.dw.data_profiling.form.TableForm;
 import com.anjuke.dw.data_profiling.model.Column;
 import com.anjuke.dw.data_profiling.model.Connection;
 import com.anjuke.dw.data_profiling.model.Table;
@@ -215,6 +221,39 @@ public class TableController {
         model.addAttribute("tableList", tableList);
 
         return "table/list";
+    }
+
+    @RequestMapping(value="/add/{connectionId}", method=RequestMethod.GET)
+    public String add(@PathVariable int connectionId, ModelMap model) {
+
+        Connection connection = connectionDao.findById(connectionId);
+        if (connection == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        model.addAttribute("connection", connection);
+        model.addAttribute("tableForm", new TableForm());
+
+        return "table/add";
+    }
+
+    @RequestMapping(value="/add/{connectionId}", method=RequestMethod.POST)
+    public String addSubmit(@PathVariable int connectionId,
+            @Valid @ModelAttribute("tableForm") TableForm tableForm,
+            BindingResult result, ModelMap model) {
+
+        Connection connection = connectionDao.findById(connectionId);
+        if (connection == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        if (!result.hasErrors()) {
+
+        }
+
+        model.addAttribute("connection", connection);
+
+        return "table/add";
     }
 
 }

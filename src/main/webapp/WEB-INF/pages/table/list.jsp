@@ -24,4 +24,5 @@
     </tr>
     </c:forEach>
   </table>
+  <a href="/table/add/${connection.id}">Add Table</a>
 </html>
