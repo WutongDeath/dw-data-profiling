@@ -7,6 +7,7 @@ public class Table {
     private Integer connectionId;
     private String name;
     private Integer status;
+    private Integer columnCount;
     private Long rowCount;
     private Long dataLength;
     private Date updated;
@@ -33,6 +34,12 @@ public class Table {
     }
     public void setStatus(Integer status) {
         this.status = status;
+    }
+    public Integer getColumnCount() {
+        return columnCount;
+    }
+    public void setColumnCount(Integer columnCount) {
+        this.columnCount = columnCount;
     }
     public Long getRowCount() {
         return rowCount;

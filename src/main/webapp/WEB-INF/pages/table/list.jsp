@@ -17,7 +17,7 @@
     <tr>
       <td>${status.index + 1}</td>
       <td>${table.name}</td>
-      <td>-</td>
+      <td>${table.columnCount}</td>
       <td>${table.rowCount}</td>
       <td>${table.dataLength}</td>
       <td><a href="/table/view/${table.id}">Detail</a></td>

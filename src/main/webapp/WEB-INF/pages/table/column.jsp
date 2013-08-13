@@ -2,6 +2,9 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/functions" prefix="f" %>
 <html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  </head>
   <body>
     <h1>Column: ${column.name} (Table: <a href="/table/view/${table.id}">${table.name}</a>)</h1>
 
@@ -73,11 +76,23 @@
         <th>Min Length</th>
         <th>Max Length</th>
         <th>Avg Length</th>
+        <th>Top 10</th>
+        <th>Bottom 10</th>
       </tr>
       <tr>
         <td>${stringStats.minLength}</td>
         <td>${stringStats.maxLength}</td>
         <td>${stringStats.avgLength}</td>
+        <td>
+          <c:forEach var="entry" items="${stringStats.top10}">
+          ${entry.key}: ${entry.value}<br>
+          </c:forEach>
+        </td>
+        <td>
+          <c:forEach var="entry" items="${stringStats.bottom10}">
+          ${entry.key}: ${entry.value}<br>
+          </c:forEach>
+        </td>
       </tr>
     </table>
     </c:if>

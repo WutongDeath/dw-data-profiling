@@ -18,7 +18,7 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
     public Table findById(int id) throws DataAccessException {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT id, connection_id, name, status, row_count, data_length, updated FROM dp_table WHERE id = ?",
+                    "SELECT id, connection_id, name, status, column_count, row_count, data_length, updated FROM dp_table WHERE id = ?",
                     rowMapper, id);
         } catch (IncorrectResultSizeDataAccessException e) {
             return null;
@@ -28,7 +28,7 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
     @Override
     public List<Table> findByConnectionId(int connectionId) throws DataAccessException {
         return getJdbcTemplate().query(
-                "SELECT id, connection_id, name, status, row_count, data_length, updated FROM dp_table WHERE connection_id = ? ORDER BY id",
+                "SELECT id, connection_id, name, status, column_count, row_count, data_length, updated FROM dp_table WHERE connection_id = ? ORDER BY id",
                 rowMapper, connectionId);
 
     }
@@ -42,6 +42,7 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
             table.setConnectionId(rs.getInt("connection_id"));
             table.setName(rs.getString("name"));
             table.setStatus(rs.getInt("status"));
+            table.setColumnCount(rs.getInt("column_count"));
             table.setRowCount(rs.getLong("row_count"));
             table.setDataLength(rs.getLong("data_length"));
             table.setUpdated(rs.getDate("updated"));
@@ -60,10 +61,11 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
     public Integer insert(Table table) throws DataAccessException {
 
         int rows = getJdbcTemplate().update(
-                "INSERT INTO dp_table (connection_id, name, status, row_count, data_length) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO dp_table (connection_id, name, status, column_count, row_count, data_length) VALUES (?, ?, ?, ?, ?, ?)",
                 table.getConnectionId(),
                 table.getName(),
                 table.getStatus(),
+                table.getColumnCount(),
                 table.getRowCount(),
                 table.getDataLength());
 

@@ -210,6 +210,21 @@ public class TableController {
             stringStatsMap.put("maxLength", (Long) stringStats.get("max_length"));
             stringStatsMap.put("avgLength", (Long) stringStats.get("avg_length"));
 
+            JSONArray stringTop10 = (JSONArray) stringStats.get("top10");
+            Map<String, Long> stringTop10Map = new LinkedHashMap<String, Long>();
+            for (int i = 0; i < stringTop10.size(); i += 2) {
+                stringTop10Map.put((String) stringTop10.get(i), (Long) stringTop10.get(i + 1));
+            }
+            stringStatsMap.put("top10", stringTop10Map);
+            logger.info(stringTop10Map);
+
+            JSONArray stringBottom10 = (JSONArray) stringStats.get("bottom10");
+            Map<String, Long> stringBottom10Map = new LinkedHashMap<String, Long>();
+            for (int i = 0; i < stringBottom10.size(); i += 2) {
+                stringBottom10Map.put((String) stringBottom10.get(i), (Long) stringBottom10.get(i + 1));
+            }
+            stringStatsMap.put("bottom10", stringBottom10Map);
+
         }
 
         if ((c.getTypeFlag() & 4) == 4) { // datetime
@@ -290,21 +305,9 @@ public class TableController {
                 PreparedStatement stmt = conn.prepareStatement("DESC " + tableForm.getTableName());
                 ResultSet rs = stmt.executeQuery();
 
-                Table table = new Table();
-                table.setConnectionId(connection.getId());
-                table.setName(tableForm.getTableName());
-                table.setStatus(0);
-                table.setRowCount(0L);
-                table.setDataLength(0L);
-
-                Integer tableId = tableDao.insert(table);
-                if (tableId == null) {
-                    throw new Exception("fail to insert table");
-                }
-
+                List<Column> columnList = new ArrayList<Column>();
                 while (rs.next()) {
                     Column column = new Column();
-                    column.setTableId(tableId);
                     column.setName(rs.getString("field"));
                     column.setType(rs.getString("type"));
 
@@ -319,6 +322,24 @@ public class TableController {
                     }
 
                     column.setStats("");
+                    columnList.add(column);
+                }
+
+                Table table = new Table();
+                table.setConnectionId(connection.getId());
+                table.setName(tableForm.getTableName());
+                table.setStatus(0);
+                table.setColumnCount(columnList.size());
+                table.setRowCount(0L);
+                table.setDataLength(0L);
+
+                Integer tableId = tableDao.insert(table);
+                if (tableId == null) {
+                    throw new Exception("fail to insert table");
+                }
+
+                for (Column column : columnList) {
+                    column.setTableId(tableId);
                     columnDao.insert(column);
                 }
 
