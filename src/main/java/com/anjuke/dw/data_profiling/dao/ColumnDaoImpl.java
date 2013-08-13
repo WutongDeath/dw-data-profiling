@@ -48,4 +48,22 @@ public class ColumnDaoImpl extends JdbcDaoSupport implements ColumnDao {
 
     };
 
+    @Override
+    public Integer insert(Column column) throws DataAccessException {
+
+        int rows = getJdbcTemplate().update(
+                "INSERT INTO dp_column (table_id, name, type, type_flag, stats) VALUES (?, ?, ?, ?, ?)",
+                column.getTableId(),
+                column.getName(),
+                column.getType(),
+                column.getTypeFlag(),
+                column.getStats());
+
+        if (rows == 0) {
+            return null;
+        }
+
+        return getJdbcTemplate().queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+    }
+
 }

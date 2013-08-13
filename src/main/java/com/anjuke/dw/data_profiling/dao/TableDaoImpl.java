@@ -8,6 +8,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import com.anjuke.dw.data_profiling.model.Table;
 
@@ -48,5 +49,29 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
         }
 
     };
+
+    @Override
+    public boolean nameExists(String name) throws DataAccessException {
+        SqlRowSet rs = getJdbcTemplate().queryForRowSet("SELECT 1 FROM dp_table WHERE name = ?", name);
+        return rs.next();
+    }
+
+    @Override
+    public Integer insert(Table table) throws DataAccessException {
+
+        int rows = getJdbcTemplate().update(
+                "INSERT INTO dp_table (connection_id, name, status, row_count, data_length) VALUES (?, ?, ?, ?, ?)",
+                table.getConnectionId(),
+                table.getName(),
+                table.getStatus(),
+                table.getRowCount(),
+                table.getDataLength());
+
+        if (rows == 0) {
+            return null;
+        }
+
+        return getJdbcTemplate().queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+    }
 
 }

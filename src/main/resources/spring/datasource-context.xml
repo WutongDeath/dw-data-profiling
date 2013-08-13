@@ -13,7 +13,8 @@
     <bean id="statsDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
         destroy-method="close" p:driverClass="${jdbc.driverClassName}"
         p:jdbcUrl="${jdbc.stats.url}" p:user="${jdbc.stats.username}"
-        p:password="${jdbc.stats.password}" />
+        p:password="${jdbc.stats.password}" p:initialPoolSize="1"
+        p:minPoolSize="1" p:maxPoolSize="1" p:acquireIncrement="1" />
 
     <bean id="databaseDao" class="com.anjuke.dw.data_profiling.dao.ConnectionDaoImpl"
         p:dataSource-ref="statsDataSource" />
@@ -22,6 +23,9 @@
         p:dataSource-ref="statsDataSource" />
 
     <bean id="columnDao" class="com.anjuke.dw.data_profiling.dao.ColumnDaoImpl"
+        p:dataSource-ref="statsDataSource" />
+
+    <bean id="updateQueueDao" class="com.anjuke.dw.data_profiling.dao.UpdateQueueDaoImpl"
         p:dataSource-ref="statsDataSource" />
 
 </beans>

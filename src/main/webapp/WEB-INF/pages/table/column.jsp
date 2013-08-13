@@ -5,7 +5,7 @@
   <body>
     <h1>Column: ${column.name} (Table: <a href="/table/view/${table.id}">${table.name}</a>)</h1>
 
-    <h2>General Information:</h2>
+    <h2>General Information</h2>
     <table border="1">
       <tr>
         <th>Column Name</th>

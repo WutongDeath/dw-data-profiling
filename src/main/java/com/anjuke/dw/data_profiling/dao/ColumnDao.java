@@ -9,4 +9,5 @@ import com.anjuke.dw.data_profiling.model.Column;
 public interface ColumnDao {
     Column findById(int id) throws DataAccessException;
     List<Column> findByTableId(int tableId) throws DataAccessException;
+    Integer insert(Column column) throws DataAccessException;
 }

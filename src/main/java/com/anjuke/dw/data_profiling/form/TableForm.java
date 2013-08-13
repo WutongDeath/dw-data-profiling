@@ -1,9 +1,9 @@
 package com.anjuke.dw.data_profiling.form;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 
 public class TableForm {
-    @NotEmpty
+    @Pattern(regexp="[0-9a-zA-Z$_]+")
     private String tableName;
     public String getTableName() {
         return tableName;
