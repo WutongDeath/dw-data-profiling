@@ -44,12 +44,24 @@
         <th>Max Value</th>
         <th>Avg Value</th>
         <th>Standard Deviation</th>
+        <th>Top 10</th>
+        <th>Bottom 10</th>
       </tr>
       <tr>
         <td>${numericStats.min}</td>
         <td>${numericStats.max}</td>
         <td>${numericStats.avg}</td>
         <td>${numericStats.sd}</td>
+        <td>
+          <c:forEach var="entry" items="${numericStats.top10}">
+          ${entry.key}: ${entry.value}<br>
+          </c:forEach>
+        </td>
+        <td>
+          <c:forEach var="entry" items="${numericStats.bottom10}">
+          ${entry.key}: ${entry.value}<br>
+          </c:forEach>
+        </td>
       </tr>
     </table>
     </c:if>

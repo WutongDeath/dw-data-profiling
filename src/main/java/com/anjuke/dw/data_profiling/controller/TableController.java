@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -184,7 +185,19 @@ public class TableController {
             numericStatsMap.put("avg", (Double) numericStats.get("avg"));
             numericStatsMap.put("sd", (Double) numericStats.get("sd"));
 
+            JSONArray numericTop10 = (JSONArray) numericStats.get("top10");
+            Map<String, Long> numericTop10Map = new LinkedHashMap<String, Long>();
+            for (int i = 0; i < numericTop10.size(); i += 2) {
+                numericTop10Map.put((String) numericTop10.get(i), (Long) numericTop10.get(i + 1));
+            }
+            numericStatsMap.put("top10", numericTop10Map);
 
+            JSONArray numericBottom10 = (JSONArray) numericStats.get("bottom10");
+            Map<String, Long> numericBottom10Map = new LinkedHashMap<String, Long>();
+            for (int i = 0; i < numericBottom10.size(); i += 2) {
+                numericBottom10Map.put((String) numericBottom10.get(i), (Long) numericBottom10.get(i + 1));
+            }
+            numericStatsMap.put("bottom10", numericBottom10Map);
         }
 
         if ((c.getTypeFlag() & 2) == 2) { // string
