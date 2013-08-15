@@ -4,6 +4,7 @@
 <html>
   <body>
     <h1>Table: ${table.name} (Connection: <a href="/table/list/${connection.id}">${connection.name}</a>)</h1>
+    <p><b>Row count:</b> ${table.rowCount}</p>
     <table border="1">
       <tr>
         <th>#</th>
