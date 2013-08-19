@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Table {
     private Integer id;
-    private Integer connectionId;
+    private Integer databaseId;
     private String name;
     private Integer status;
     private Integer columnCount;
@@ -17,11 +17,11 @@ public class Table {
     public void setId(Integer id) {
         this.id = id;
     }
-    public Integer getConnectionId() {
-        return connectionId;
+    public Integer getDatabaseId() {
+        return databaseId;
     }
-    public void setConnectionId(Integer connectionId) {
-        this.connectionId = connectionId;
+    public void setDatabaseId(Integer databaseId) {
+        this.databaseId = databaseId;
     }
     public String getName() {
         return name;

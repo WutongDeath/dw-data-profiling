@@ -8,7 +8,7 @@ import com.anjuke.dw.data_profiling.model.Table;
 
 public interface TableDao {
     Table findById(int id) throws DataAccessException;
-    List<Table> findByConnectionId(int connectionId) throws DataAccessException;
+    List<Table> findByDatabaseId(int databaseId) throws DataAccessException;
     boolean nameExists(String name) throws DataAccessException;
     Integer insert(Table table) throws DataAccessException;
 }

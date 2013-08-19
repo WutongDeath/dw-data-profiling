@@ -3,7 +3,7 @@
 <%@ taglib uri="/functions" prefix="f" %>
 <html>
   <body>
-    <h1>Table: ${table.name} (Connection: <a href="/table/list/${connection.id}">${connection.name}</a>)</h1>
+    <h1>Table: ${table.name} (Database: <a href="/table/list/${database.id}">${database.name}</a>)</h1>
     <p><b>Row count:</b> ${table.rowCount}</p>
     <table border="1">
       <tr>

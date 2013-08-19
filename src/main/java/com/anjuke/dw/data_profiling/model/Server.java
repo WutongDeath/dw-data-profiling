@@ -1,13 +1,16 @@
 package com.anjuke.dw.data_profiling.model;
 
-public class Connection {
+import java.util.Date;
+
+public class Server {
     private Integer id;
     private String name;
     private String host;
     private Integer port;
     private String username;
     private String password;
-    private String database;
+    private Integer databaseCount;
+    private Date updated;
     public Integer getId() {
         return id;
     }
@@ -44,10 +47,16 @@ public class Connection {
     public void setPassword(String password) {
         this.password = password;
     }
-    public String getDatabase() {
-        return database;
+    public Integer getDatabaseCount() {
+        return databaseCount;
     }
-    public void setDatabase(String database) {
-        this.database = database;
+    public void setDatabaseCount(Integer databaseCount) {
+        this.databaseCount = databaseCount;
+    }
+    public Date getUpdated() {
+        return updated;
+    }
+    public void setUpdated(Date updated) {
+        this.updated = updated;
     }
 }

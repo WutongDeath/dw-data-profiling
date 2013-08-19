@@ -1,17 +1,10 @@
 package com.anjuke.dw.data_profiling.controller;
 
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
-
-import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
@@ -21,21 +14,16 @@ import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.anjuke.dw.data_profiling.dao.ColumnDao;
-import com.anjuke.dw.data_profiling.dao.ConnectionDao;
+import com.anjuke.dw.data_profiling.dao.DatabaseDao;
 import com.anjuke.dw.data_profiling.dao.TableDao;
 import com.anjuke.dw.data_profiling.dao.UpdateQueueDao;
-import com.anjuke.dw.data_profiling.form.TableForm;
 import com.anjuke.dw.data_profiling.model.Column;
-import com.anjuke.dw.data_profiling.model.Connection;
+import com.anjuke.dw.data_profiling.model.Database;
 import com.anjuke.dw.data_profiling.model.Table;
-import com.anjuke.dw.data_profiling.model.UpdateQueue;
 import com.anjuke.dw.data_profiling.util.ResourceNotFoundException;
 
 @Controller
@@ -55,7 +43,7 @@ public class TableController {
     private Logger logger = Logger.getLogger(TableController.class);
 
     @Autowired
-    private ConnectionDao connectionDao;
+    private DatabaseDao databaseDao;
 
     @Autowired
     private TableDao tableDao;
@@ -74,8 +62,8 @@ public class TableController {
             throw new ResourceNotFoundException();
         }
 
-        Connection connection = connectionDao.findById(table.getConnectionId());
-        if (connection == null) {
+        Database database = databaseDao.findById(table.getDatabaseId());
+        if (database == null) {
             throw new ResourceNotFoundException();
         }
 
@@ -133,7 +121,7 @@ public class TableController {
             columnList.add(m);
         }
 
-        model.addAttribute("connection", connection);
+        model.addAttribute("database", database);
         model.addAttribute("table", table);
         model.addAttribute("columnList", columnList);
         model.addAttribute("typeFlagMap", typeFlagMap);
@@ -245,122 +233,20 @@ public class TableController {
         return "table/column";
     }
 
-    @RequestMapping("/list/{connectionId}")
-    public String list(@PathVariable int connectionId, ModelMap model) {
+    @RequestMapping("/list/{databaseId}")
+    public String list(@PathVariable int databaseId, ModelMap model) {
 
-        Connection connection = connectionDao.findById(connectionId);
-        if (connection == null) {
+        Database database = databaseDao.findById(databaseId);
+        if (database == null) {
             throw new ResourceNotFoundException();
         }
 
-        List<Table> tableList = tableDao.findByConnectionId(connectionId);
+        List<Table> tableList = tableDao.findByDatabaseId(databaseId);
 
-        model.addAttribute("connection", connection);
+        model.addAttribute("database", database);
         model.addAttribute("tableList", tableList);
 
         return "table/list";
-    }
-
-    @RequestMapping(value="/add/{connectionId}", method=RequestMethod.GET)
-    public String add(@PathVariable int connectionId, ModelMap model) {
-
-        Connection connection = connectionDao.findById(connectionId);
-        if (connection == null) {
-            throw new ResourceNotFoundException();
-        }
-
-        model.addAttribute("connection", connection);
-        model.addAttribute("tableForm", new TableForm());
-
-        return "table/add";
-    }
-
-    private static Pattern ptrnNumericType = Pattern.compile("(?i)(int|decimal|float|double)");
-    private static Pattern ptrnStringType = Pattern.compile("(?i)(char|text)");
-    private static Pattern ptrnDatetimeType = Pattern.compile("(?i)(date|time)");
-
-    @RequestMapping(value="/add/{connectionId}", method=RequestMethod.POST)
-    public String addSubmit(@PathVariable int connectionId,
-            @Valid @ModelAttribute("tableForm") TableForm tableForm,
-            BindingResult result, ModelMap model) {
-
-        Connection connection = connectionDao.findById(connectionId);
-        if (connection == null) {
-            throw new ResourceNotFoundException();
-        }
-
-        if (!result.hasErrors()) {
-
-            try {
-
-                if (tableDao.nameExists(tableForm.getTableName())) {
-                    throw new Exception("table name exists");
-                }
-
-                java.sql.Connection conn = DriverManager.getConnection(
-                        String.format("jdbc:mysql://%s:%d/%s",
-                                connection.getHost(), connection.getPort(), connection.getDatabase()),
-                        connection.getUsername(), connection.getPassword());
-
-                PreparedStatement stmt = conn.prepareStatement("DESC " + tableForm.getTableName());
-                ResultSet rs = stmt.executeQuery();
-
-                List<Column> columnList = new ArrayList<Column>();
-                while (rs.next()) {
-                    Column column = new Column();
-                    column.setName(rs.getString("field"));
-                    column.setType(rs.getString("type"));
-
-                    if (ptrnNumericType.matcher(column.getType()).find()) {
-                        column.setTypeFlag(1);
-                    } else if (ptrnStringType.matcher(column.getType()).find()) {
-                        column.setTypeFlag(2);
-                    } else if (ptrnDatetimeType.matcher(column.getType()).find()) {
-                        column.setTypeFlag(4);
-                    } else {
-                        column.setTypeFlag(0);
-                    }
-
-                    column.setStats("");
-                    columnList.add(column);
-                }
-
-                Table table = new Table();
-                table.setConnectionId(connection.getId());
-                table.setName(tableForm.getTableName());
-                table.setStatus(0);
-                table.setColumnCount(columnList.size());
-                table.setRowCount(0L);
-                table.setDataLength(0L);
-
-                Integer tableId = tableDao.insert(table);
-                if (tableId == null) {
-                    throw new Exception("fail to insert table");
-                }
-
-                for (Column column : columnList) {
-                    column.setTableId(tableId);
-                    columnDao.insert(column);
-                }
-
-                UpdateQueue updateQueue = new UpdateQueue();
-                updateQueue.setTableId(tableId);
-                updateQueue.setStatus(1);
-                updateQueueDao.insert(updateQueue);
-
-                return "redirect:/table/view/" + tableId;
-
-            } catch (SQLException e) {
-                result.rejectValue("tableName", null, "table not found");
-            } catch (Exception e) {
-                result.rejectValue("tableName", null, e.getMessage());
-            }
-
-        }
-
-        model.addAttribute("connection", connection);
-
-        return "table/add";
     }
 
 }

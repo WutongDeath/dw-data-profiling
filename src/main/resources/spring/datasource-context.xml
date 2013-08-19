@@ -16,7 +16,10 @@
         p:password="${jdbc.stats.password}" p:initialPoolSize="1"
         p:minPoolSize="1" p:maxPoolSize="1" p:acquireIncrement="1" />
 
-    <bean id="databaseDao" class="com.anjuke.dw.data_profiling.dao.ConnectionDaoImpl"
+    <bean id="serverDao" class="com.anjuke.dw.data_profiling.dao.ServerDaoImpl"
+        p:dataSource-ref="statsDataSource" />
+
+    <bean id="databaseDao" class="com.anjuke.dw.data_profiling.dao.DatabaseDaoImpl"
         p:dataSource-ref="statsDataSource" />
 
     <bean id="tableDao" class="com.anjuke.dw.data_profiling.dao.TableDaoImpl"

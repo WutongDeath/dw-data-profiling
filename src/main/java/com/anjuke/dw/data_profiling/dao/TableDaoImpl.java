@@ -18,7 +18,7 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
     public Table findById(int id) throws DataAccessException {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT id, connection_id, name, status, column_count, row_count, data_length, updated FROM dp_table WHERE id = ?",
+                    "SELECT id, database_id, name, status, column_count, row_count, data_length, updated FROM dp_table WHERE id = ?",
                     rowMapper, id);
         } catch (IncorrectResultSizeDataAccessException e) {
             return null;
@@ -26,10 +26,10 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
     }
 
     @Override
-    public List<Table> findByConnectionId(int connectionId) throws DataAccessException {
+    public List<Table> findByDatabaseId(int databaseId) throws DataAccessException {
         return getJdbcTemplate().query(
-                "SELECT id, connection_id, name, status, column_count, row_count, data_length, updated FROM dp_table WHERE connection_id = ? ORDER BY id",
-                rowMapper, connectionId);
+                "SELECT id, database_id, name, status, column_count, row_count, data_length, updated FROM dp_table WHERE database_id = ? ORDER BY id",
+                rowMapper, databaseId);
 
     }
 
@@ -39,7 +39,7 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
         public Table mapRow(ResultSet rs, int rowNum) throws SQLException {
             Table table = new Table();
             table.setId(rs.getInt("id"));
-            table.setConnectionId(rs.getInt("connection_id"));
+            table.setDatabaseId(rs.getInt("database_id"));
             table.setName(rs.getString("name"));
             table.setStatus(rs.getInt("status"));
             table.setColumnCount(rs.getInt("column_count"));
@@ -61,8 +61,8 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
     public Integer insert(Table table) throws DataAccessException {
 
         int rows = getJdbcTemplate().update(
-                "INSERT INTO dp_table (connection_id, name, status, column_count, row_count, data_length) VALUES (?, ?, ?, ?, ?, ?)",
-                table.getConnectionId(),
+                "INSERT INTO dp_table (database_id, name, status, column_count, row_count, data_length) VALUES (?, ?, ?, ?, ?, ?)",
+                table.getDatabaseId(),
                 table.getName(),
                 table.getStatus(),
                 table.getColumnCount(),

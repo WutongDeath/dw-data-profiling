@@ -2,7 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
   <body>
-    <h1>Table List (Connection: <a href="/connection/list">${connection.name}</a>)</h1>
+    <h1>Table List (Database: <a href="/database/list/${database.serverId}">${database.name}</a>)</h1>
   </body>
   <table border="1">
     <tr>
@@ -24,5 +24,4 @@
     </tr>
     </c:forEach>
   </table>
-  <a href="/table/add/${connection.id}">Add Table</a>
 </html>
