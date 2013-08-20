@@ -13,10 +13,8 @@ TableList.prototype = {
 
     initList: function() {
         var self = this;
-        self.currentPage = 1;
         self.perPage = 15;
-        self.totalPage = Math.ceil(self.tableNameList.length / self.perPage);
-        self.refreshList();
+        self.resetList();
     },
 
     refreshList: function() {
@@ -28,10 +26,16 @@ TableList.prototype = {
     	var tables = [];
     	var start = (self.currentPage - 1) * self.perPage;
     	for (var i = 0; i < self.perPage; ++i) {
-    		if (start >= self.tableNameList.length) {
+    		if (start >= self.currentList.length) {
     			break;
     		}
-    		tables.push(self.tableNameList[start + i]);
+    		tables.push(self.currentList[start + i]);
+    	}
+
+    	if (tables.length == 0) {
+    		$('#tblTables tr:eq(1)').hide();
+    		$('<tr><td colspan="6" align="center">No Result</td></tr>').appendTo('#tblTables');
+    		return;
     	}
 
     	var data = {
@@ -62,6 +66,14 @@ TableList.prototype = {
     	});
     },
 
+    resetList: function() {
+    	var self = this;
+    	self.currentList = self.tableNameList;
+    	self.currentPage = 1;
+    	self.totalPage = Math.ceil(self.currentList.length / self.perPage);
+    	self.refreshList();
+    },
+
     initSearch: function() {
     	var self = this;
 
@@ -79,14 +91,29 @@ TableList.prototype = {
     search: function() {
     	var self = this;
 
-    	var keyword = $('#txtSearch').val();
-    	console.log(keyword);
+    	var keyword = $.trim($('#txtSearch').val());
+    	if (!keyword) {
+    		self.resetList();
+    		return;
+    	}
+
+    	keyword = keyword.toLowerCase();
+    	self.currentList = [];
+    	$.each(self.tableNameList, function() {
+    		if (this.toLowerCase().indexOf(keyword) != -1) {
+    			self.currentList.push(this);
+    		}
+    	});
+
+    	self.currentPage = 1;
+    	self.totalPage = Math.ceil(self.currentList.length / self.perPage);
+    	self.refreshList();
     },
 
     initPagination: function() {
     	var self = this;
 
-    	$('#btnGo').click(function() {
+    	$('#btnPage').click(function() {
     		var page = parseInt($('#txtPage').val());
     		if (!page) {
     			return false;

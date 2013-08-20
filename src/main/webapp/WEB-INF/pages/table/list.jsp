@@ -22,7 +22,7 @@
       </tr>
     </table>
 
-    <p>Page: <input type="text" id="txtPage"> <input type="button" value="Go" id="btnGo"></p>
+    <p>Page: <input type="text" id="txtPage"> <input type="button" value="Go" id="btnPage"></p>
 
     <script type="text/javascript" src="/webjars/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript" src="/resources/js/table_list.js"></script>
