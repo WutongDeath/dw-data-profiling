@@ -66,4 +66,11 @@ public class ColumnDaoImpl extends JdbcDaoSupport implements ColumnDao {
         return getJdbcTemplate().queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
     }
 
+    @Override
+    public boolean delete(int columnId) throws DataAccessException {
+        return getJdbcTemplate().update(
+                "DELETE FROM dp_column WHERE id = ?",
+                columnId) > 0;
+    }
+
 }

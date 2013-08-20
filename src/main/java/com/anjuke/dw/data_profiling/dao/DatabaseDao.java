@@ -10,4 +10,5 @@ public interface DatabaseDao {
     Database findById(int id) throws DataAccessException;
     List<Database> findByServerId(int serverId) throws DataAccessException;
     Integer insert(Database database) throws DataAccessException;
+    boolean delete(int databaseId) throws DataAccessException;
 }

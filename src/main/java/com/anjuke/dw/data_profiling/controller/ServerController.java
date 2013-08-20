@@ -15,14 +15,20 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.anjuke.dw.data_profiling.dao.ColumnDao;
 import com.anjuke.dw.data_profiling.dao.DatabaseDao;
 import com.anjuke.dw.data_profiling.dao.ServerDao;
+import com.anjuke.dw.data_profiling.dao.TableDao;
 import com.anjuke.dw.data_profiling.form.ServerForm;
+import com.anjuke.dw.data_profiling.model.Column;
 import com.anjuke.dw.data_profiling.model.Database;
 import com.anjuke.dw.data_profiling.model.Server;
+import com.anjuke.dw.data_profiling.model.Table;
+import com.anjuke.dw.data_profiling.util.ResourceNotFoundException;
 
 @Controller
 @RequestMapping("/server")
@@ -33,6 +39,12 @@ public class ServerController {
 
     @Autowired
     private DatabaseDao databaseDao;
+
+    @Autowired
+    private TableDao tableDao;
+
+    @Autowired
+    private ColumnDao columnDao;
 
     @RequestMapping("/list")
     public String list(ModelMap model) {
@@ -64,16 +76,27 @@ public class ServerController {
 
                     Connection conn = DriverManager.getConnection(
                             String.format(
-                                    "jdbc:mysql://%s:%d/?useUnicode=true&characterEncoding=UTF-8",
+                                    "jdbc:mysql://%s:%d/information_schema?useUnicode=true&characterEncoding=UTF-8",
                                     serverForm.getHost(), serverForm.getPort()),
                             serverForm.getUsername(), serverForm.getPassword());
 
-                    PreparedStatement stmt = conn.prepareStatement("SELECT schema_name FROM information_schema.schemata");
+                    PreparedStatement stmt = conn.prepareStatement(
+                            "SELECT table_schema, COUNT(*) AS table_count FROM tables GROUP BY table_schema");
                     ResultSet rs = stmt.executeQuery();
                     while (rs.next()) {
+
+                        String tableSchema = rs.getString("table_schema");
+                        if (tableSchema.equals("information_schema")
+                                || tableSchema.equals("performance_schema")
+                                || tableSchema.equals("mysql")
+                                || tableSchema.equals("test")
+                                || tableSchema.equals("heartbeat_db")) {
+                            continue;
+                        }
+
                         Database database = new Database();
-                        database.setName(rs.getString("schema_name"));
-                        database.setTableCount(0);
+                        database.setName(rs.getString("table_schema"));
+                        database.setTableCount(rs.getInt("table_count"));
                         databaseList.add(database);
                     }
 
@@ -114,6 +137,32 @@ public class ServerController {
         model.addAttribute("serverForm", serverForm);
 
         return "server/add";
+    }
+
+    @RequestMapping("/delete/{serverId}")
+    public String delete(@PathVariable int serverId, ModelMap model) {
+
+        Server server = serverDao.findById(serverId);
+        if (server == null) {
+            throw new ResourceNotFoundException();
+        }
+
+        for (Database database : databaseDao.findByServerId(server.getId())) {
+
+            for (Table table : tableDao.findByDatabaseId(database.getId())) {
+
+                for (Column column : columnDao.findByTableId(table.getId())) {
+                    columnDao.delete(column.getId());
+                }
+                tableDao.delete(table.getId());
+
+            }
+            databaseDao.delete(database.getId());
+
+        }
+        serverDao.delete(server.getId());
+
+        return "redirect:/server/list";
     }
 
 }

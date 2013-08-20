@@ -26,7 +26,9 @@
       <td>${server.password}</td>
       <td>${server.databaseCount}</td>
       <td>${server.updated}</td>
-      <td>-</td>
+      <td>
+        <a href="/server/delete/${server.id}" onclick="return confirm('Are you sure to delete this server?');">Delete</a>
+      </td>
     </tr>
     </c:forEach>
   </table>

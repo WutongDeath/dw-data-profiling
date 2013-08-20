@@ -76,4 +76,11 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
         return getJdbcTemplate().queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
     }
 
+    @Override
+    public boolean delete(int tableId) throws DataAccessException {
+        return getJdbcTemplate().update(
+                "DELETE FROM dp_table WHERE id = ?",
+                tableId) > 0;
+    }
+
 }

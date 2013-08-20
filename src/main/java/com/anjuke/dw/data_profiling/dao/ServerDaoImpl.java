@@ -57,6 +57,13 @@ public class ServerDaoImpl extends JdbcDaoSupport implements ServerDao {
                 Integer.class, serverName) > 0;
     }
 
+    @Override
+    public boolean delete(int serverId) throws DataAccessException {
+        return getJdbcTemplate().update(
+                "DELETE FROM dp_server WHERE id = ?",
+                serverId) > 0;
+    }
+
     private RowMapper<Server> rowMapper = new RowMapper<Server>() {
 
         @Override

@@ -11,4 +11,5 @@ public interface ServerDao {
     Server findById(int serverId) throws DataAccessException;
     Integer insert(Server server) throws DataAccessException;
     boolean nameExsits(String serverName) throws DataAccessException;
+    boolean delete(int serverId) throws DataAccessException;
 }
