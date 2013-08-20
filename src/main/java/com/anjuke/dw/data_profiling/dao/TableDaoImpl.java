@@ -14,11 +14,14 @@ import com.anjuke.dw.data_profiling.model.Table;
 
 public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
 
+    private static String UPDATE_FIELDS = "database_id, name, status, column_count, row_count, data_length";
+    private static String SELECT_FIELDS = "id, updated, " + UPDATE_FIELDS;
+
     @Override
     public Table findById(int id) throws DataAccessException {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT id, database_id, name, status, column_count, row_count, data_length, updated FROM dp_table WHERE id = ?",
+                    "SELECT " + SELECT_FIELDS + " FROM dp_table WHERE id = ?",
                     rowMapper, id);
         } catch (IncorrectResultSizeDataAccessException e) {
             return null;
@@ -28,7 +31,7 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
     @Override
     public List<Table> findByDatabaseId(int databaseId) throws DataAccessException {
         return getJdbcTemplate().query(
-                "SELECT id, database_id, name, status, column_count, row_count, data_length, updated FROM dp_table WHERE database_id = ? ORDER BY id",
+                "SELECT " + SELECT_FIELDS + " FROM dp_table WHERE database_id = ? ORDER BY id",
                 rowMapper, databaseId);
 
     }
@@ -61,7 +64,7 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
     public Integer insert(Table table) throws DataAccessException {
 
         int rows = getJdbcTemplate().update(
-                "INSERT INTO dp_table (database_id, name, status, column_count, row_count, data_length) VALUES (?, ?, ?, ?, ?, ?)",
+                "INSERT INTO dp_table (" + UPDATE_FIELDS + ") VALUES (?, ?, ?, ?, ?, ?)",
                 table.getDatabaseId(),
                 table.getName(),
                 table.getStatus(),
@@ -81,6 +84,18 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
         return getJdbcTemplate().update(
                 "DELETE FROM dp_table WHERE id = ?",
                 tableId) > 0;
+    }
+
+    @Override
+    public Table findByDatabaseIdAndTableName(int databaseId, String tableName)
+            throws DataAccessException {
+        try {
+            return getJdbcTemplate().queryForObject(
+                    "SELECT " + SELECT_FIELDS + " FROM dp_table WHERE database_id = ? AND name = ?",
+                    rowMapper, databaseId, tableName);
+        } catch (IncorrectResultSizeDataAccessException e) {
+            return null;
+        }
     }
 
 }

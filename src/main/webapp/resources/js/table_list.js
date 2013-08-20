@@ -35,23 +35,27 @@ TableList.prototype = {
     	}
 
     	var data = {
-    		database_id: self.databaseId,
+    		databaseId: self.databaseId,
     		tables: tables.join(',')
     	};
 
-    	$.getJSON('/table/get_info', data, function(response) {
+    	$.getJSON('/table/get_info/', data, function(response) {
     		$('#tblTables tr:eq(1)').hide();
     		$.each(tables, function(i) {
     			if (!(this in response)) {
     				return true;
     			}
+    			var tableViewParams = $.param({
+    				databaseId: self.databaseId,
+    				table: this
+    			});
     			var tr = '<tr>'
     				   + '<td>' + (start + i + 1) + '</td>'
     				   + '<td>' + this + '</td>'
     				   + '<td>' + response[this].columnCount + '</td>'
     				   + '<td>' + response[this].rowCount + '</td>'
     				   + '<td>' + response[this].dataLength + '</td>'
-    				   + '<td>-</td>'
+    				   + '<td><a href="/column/list/?' + tableViewParams + '">Detail</a></td>'
     				   + '</tr>';
     			$(tr).appendTo('#tblTables');
     		});

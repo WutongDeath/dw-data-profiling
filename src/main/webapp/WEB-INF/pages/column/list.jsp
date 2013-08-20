@@ -11,6 +11,8 @@
         <th>Column Name</th>
         <th>Data Type</th>
         <th>Analyze Type</th>
+
+        <c:if test="${profiled}">
         <th>Null<br>Count</th>
         <th>Null<br>Percent</th>
         <th>Distinct<br>Values</th>
@@ -19,6 +21,8 @@
         <th>Avg Value<br>or Length</th>
         <th>Standard<br>Deviation</th>
         <th>More</th>
+        </c:if>
+
       </tr>
       <c:forEach var="column" items="${columnList}" varStatus="status">
       <tr>
@@ -35,14 +39,18 @@
           </label>
           </c:forEach>
         </td>
-        <td>${column.nullCount}</td>
-        <td>${column.nullPercent}</td>
-        <td>${column.distinctValues}</td>
-        <td>${column.min}</td>
-        <td>${column.max}</td>
-        <td>${column.avg}</td>
-        <td>${column.sd}</td>
+
+        <c:if test="${profiled}">
+        <td>${columnStats[column.id].nullCount}</td>
+        <td>${columnStats[column.id].nullPercent}</td>
+        <td>${columnStats[column.id].distinctValues}</td>
+        <td>${columnStats[column.id].min}</td>
+        <td>${columnStats[column.id].max}</td>
+        <td>${columnStats[column.id].avg}</td>
+        <td>${columnStats[column.id].sd}</td>
         <td><a href="/table/column/${column.id}">Detail</a></td>
+        </c:if>
+
       </tr>
       </c:forEach>
     </table>

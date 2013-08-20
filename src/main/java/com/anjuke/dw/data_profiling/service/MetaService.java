@@ -15,8 +15,10 @@ import org.springframework.stereotype.Service;
 
 import com.anjuke.dw.data_profiling.dao.DatabaseDao;
 import com.anjuke.dw.data_profiling.dao.ServerDao;
+import com.anjuke.dw.data_profiling.model.Column;
 import com.anjuke.dw.data_profiling.model.Database;
 import com.anjuke.dw.data_profiling.model.Server;
+import com.anjuke.dw.data_profiling.model.Table;
 import com.anjuke.dw.data_profiling.util.Functions;
 
 @Service
@@ -146,6 +148,60 @@ public class MetaService {
 
         } catch (SQLException e) {
             return null;
+        } finally {
+            closeConnection(conn);
+        }
+
+    }
+
+    public void getTableColumnInfo(int databaseId, String tableName, Table table, List<Column> columnList) {
+
+        Database database = databaseDao.findById(databaseId);
+        if (database == null) {
+            return;
+        }
+
+        Connection conn = openConnection(databaseId, true);
+        if (conn == null) {
+            return;
+        }
+
+        try {
+
+            PreparedStatement stmt = conn.prepareStatement(
+                    "SELECT table_rows, data_length FROM tables"
+                    + " WHERE table_schema = ? AND table_name = ?");
+            stmt.setString(1, database.getName());
+            stmt.setString(2, tableName);
+            ResultSet rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return;
+            }
+            table.setDatabaseId(database.getId());
+            table.setName(tableName);
+            table.setRowCount(rs.getLong("table_rows"));
+            table.setDataLength(rs.getLong("data_length"));
+
+            stmt = conn.prepareStatement(
+                    "SELECT column_name, column_type FROM columns"
+                    + " WHERE table_schema = ? AND table_name = ?"
+                    + " ORDER BY column_name");
+            stmt.setString(1, database.getName());
+            stmt.setString(2, tableName);
+
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                Column column = new Column();
+                column.setName(rs.getString("column_name"));
+                column.setType(rs.getString("column_type"));
+                column.setTypeFlag(Functions.parseTypeFlag(column.getType()));
+                columnList.add(column);
+            }
+
+            table.setColumnCount(columnList.size());
+
+        } catch (SQLException e) {
+            return;
         } finally {
             closeConnection(conn);
         }

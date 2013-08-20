@@ -12,4 +12,5 @@ public interface TableDao {
     boolean nameExists(String name) throws DataAccessException;
     Integer insert(Table table) throws DataAccessException;
     boolean delete(int tableId) throws DataAccessException;
+    Table findByDatabaseIdAndTableName(int databaseId, String tableName) throws DataAccessException;
 }
