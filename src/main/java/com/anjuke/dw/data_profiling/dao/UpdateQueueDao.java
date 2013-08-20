@@ -6,4 +6,5 @@ import com.anjuke.dw.data_profiling.model.UpdateQueue;
 
 public interface UpdateQueueDao {
     Integer insert(UpdateQueue updateQueue) throws DataAccessException;
+    Integer insert(Integer tableId) throws DataAccessException;
 }

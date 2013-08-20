@@ -2,6 +2,7 @@ package com.anjuke.dw.data_profiling.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.dao.DataAccessException;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import com.anjuke.dw.data_profiling.model.Table;
+import com.anjuke.dw.data_profiling.util.Functions;
 
 public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
 
@@ -48,7 +50,7 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
             table.setColumnCount(rs.getInt("column_count"));
             table.setRowCount(rs.getLong("row_count"));
             table.setDataLength(rs.getLong("data_length"));
-            table.setUpdated(rs.getDate("updated"));
+            table.setUpdated(rs.getTimestamp("updated"));
             return table;
         }
 
@@ -96,6 +98,37 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
         } catch (IncorrectResultSizeDataAccessException e) {
             return null;
         }
+    }
+
+    @Override
+    public List<Table> findByDatabaseIdAndTableNameList(int databaseId,
+            List<String> tableNameList) throws DataAccessException {
+
+        List<Object> args = new ArrayList<Object>();
+        args.add(databaseId);
+
+        List<String> inList = new ArrayList<String>();
+        for (int i = 0; i < tableNameList.size(); ++i) {
+            inList.add("?");
+            args.add(tableNameList.get(i));
+        }
+
+        return getJdbcTemplate().query(
+                "SELECT " + SELECT_FIELDS + " FROM dp_table"
+                + " WHERE database_id = ? AND name IN (" + Functions.joinString(inList, ",") + ")",
+                args.toArray(), rowMapper);
+    }
+
+    @Override
+    public boolean update(Table table) throws DataAccessException {
+        return getJdbcTemplate().update(
+                "UPDATE dp_table SET status = ?, column_count = ?, row_count = ?, data_length = ?"
+                + " WHERE id = ?",
+                table.getStatus(),
+                table.getColumnCount(),
+                table.getRowCount(),
+                table.getDataLength(),
+                table.getId()) > 0;
     }
 
 }

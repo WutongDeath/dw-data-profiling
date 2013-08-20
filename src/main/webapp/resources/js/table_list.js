@@ -43,26 +43,69 @@ TableList.prototype = {
     		tables: tables.join(',')
     	};
 
-    	$.getJSON('/table/get_info/', data, function(response) {
+    	$.getJSON('/table/get_info/', data, function(tableInfo) {
+
     		$('#tblTables tr:eq(1)').hide();
-    		$.each(tables, function(i) {
-    			if (!(this in response)) {
+
+    		$.each(tables, function(i, tableName) {
+
+    			if (!(tableName in tableInfo)) {
     				return true;
     			}
-    			var tableViewParams = $.param({
-    				databaseId: self.databaseId,
-    				table: this
-    			});
+
     			var tr = '<tr>'
     				   + '<td>' + (start + i + 1) + '</td>'
     				   + '<td>' + this + '</td>'
-    				   + '<td>' + response[this].columnCount + '</td>'
-    				   + '<td>' + response[this].rowCount + '</td>'
-    				   + '<td>' + response[this].dataLength + '</td>'
-    				   + '<td><a href="/column/list/?' + tableViewParams + '">Detail</a></td>'
-    				   + '</tr>';
-    			$(tr).appendTo('#tblTables');
+    				   + '<td>' + tableInfo[this].columnCount + '</td>'
+    				   + '<td>' + tableInfo[this].rowCount + '</td>'
+    				   + '<td>' + tableInfo[this].dataLength + '</td>';
+
+    			if ('status' in tableInfo[this]) {
+
+    				if (tableInfo[this].status == 1) {
+    					tr += '<td>Processing</td>';
+    				} else if (tableInfo[this].status == 2) {
+    					tr += '<td>Processed</td>';
+    				} else {
+    					tr += '<td>Unknown</td>';
+    				}
+    				tr += '<td>' + tableInfo[this].updated + '</td>';
+
+    			} else {
+    				tr += '<td>-</td><td>-</td>';
+    				tableInfo[this].status = 0;
+    			}
+
+    			var data = $.param({
+    				databaseId: self.databaseId,
+    				table: tableName
+    			});
+
+    			tr += '<td><a target="_blank" href="/column/list/?' + data + '">Detail</a>'
+    			    + ' <a href="javascript:void(0)" profile="profile">Profile</a></td>'
+    				+ '</tr>';
+
+    			var $tr = $(tr);
+    			$tr.find('a[profile]').click(function() {
+
+    				if (tableInfo[tableName].status == 1) {
+    					alert('Profiling is in progress!');
+    					return false;
+    				}
+
+    				$.post('/table/start_profiling/', data, function(result) {
+    					if (result.status == 'ok') {
+    						self.refreshList();
+    					} else {
+    						alert(result.msg);
+    					}
+    				}, 'json');
+
+    			});
+
+    			$tr.appendTo('#tblTables');
     		});
+
     	});
     },
 

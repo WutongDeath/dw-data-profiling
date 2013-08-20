@@ -1,5 +1,6 @@
 package com.anjuke.dw.data_profiling.controller;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import com.anjuke.dw.data_profiling.model.Column;
 import com.anjuke.dw.data_profiling.model.Database;
 import com.anjuke.dw.data_profiling.model.Table;
 import com.anjuke.dw.data_profiling.service.MetaService;
+import com.anjuke.dw.data_profiling.util.Functions;
 import com.anjuke.dw.data_profiling.util.ResourceNotFoundException;
 
 @Controller
@@ -185,6 +187,8 @@ public class TableController {
         return "table/list";
     }
 
+    private SimpleDateFormat dfDatetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     @RequestMapping(value="/get_info/", produces="application/json")
     @ResponseBody
     public String getInfo(@RequestParam("databaseId") int databaseId,
@@ -200,7 +204,52 @@ public class TableController {
             return "{}";
         }
 
+        for (Table table : tableDao.findByDatabaseIdAndTableNameList(databaseId, tableNameList)) {
+            Map<String, Object> info = tableInfoMap.get(table.getName());
+            info.put("status", table.getStatus());
+            info.put("updated", dfDatetime.format(table.getUpdated()));
+        }
+
         return JSONValue.toJSONString(tableInfoMap);
+    }
+
+    @RequestMapping(value="/start_profiling/", produces="application/json")
+    @ResponseBody
+    public String startProfiling(@RequestParam("databaseId") int databaseId,
+            @RequestParam("table") String tableName) {
+
+        Table table = tableDao.findByDatabaseIdAndTableName(databaseId, tableName);
+        if (table == null) {
+
+            table = new Table();
+            List<Column> columnList = new ArrayList<Column>();
+            metaService.getTableColumnInfo(databaseId, tableName, table, columnList);
+            if (columnList.size() == 0) {
+                return Functions.output("error", "table not found");
+            }
+
+            table.setStatus(Table.STATUS_NEW);
+            Integer tableId = tableDao.insert(table);
+            if (tableId == null) {
+                return Functions.output("error", "fail to insert table");
+            }
+
+            for (Column column : columnList) {
+                column.setTableId(tableId);
+                columnDao.insert(column);
+            }
+
+            updateQueueDao.insert(tableId);
+            return Functions.output("ok");
+
+        } else {
+
+            table.setStatus(Table.STATUS_NEW);
+            tableDao.update(table);
+            updateQueueDao.insert(table.getId());
+            return Functions.output("ok");
+
+        }
 
     }
 

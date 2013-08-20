@@ -1,8 +1,12 @@
 package com.anjuke.dw.data_profiling.util;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.json.simple.JSONValue;
 
 
 public final class Functions {
@@ -43,6 +47,19 @@ public final class Functions {
             return 0;
         }
 
+    }
+
+    public static String output(String status, String message) {
+        Map<String, String> result = new HashMap<String, String>();
+        result.put("status", status);
+        if (message != null) {
+            result.put("msg", message);
+        }
+        return JSONValue.toJSONString(result);
+    }
+
+    public static String output(String status) {
+        return output(status, null);
     }
 
 }

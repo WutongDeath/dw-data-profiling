@@ -71,7 +71,7 @@ public class ColumnController {
             columnList = new ArrayList<Column>();
 
             metaService.getTableColumnInfo(databaseId, tableName, table, columnList);
-            if (columnList == null || columnList.size() == 0) {
+            if (columnList.size() == 0) {
                 throw new ResourceNotFoundException();
             }
 

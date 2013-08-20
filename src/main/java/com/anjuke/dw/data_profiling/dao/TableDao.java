@@ -13,4 +13,6 @@ public interface TableDao {
     Integer insert(Table table) throws DataAccessException;
     boolean delete(int tableId) throws DataAccessException;
     Table findByDatabaseIdAndTableName(int databaseId, String tableName) throws DataAccessException;
+    List<Table> findByDatabaseIdAndTableNameList(int databaseId, List<String> tableNameList) throws DataAccessException;
+    boolean update(Table table) throws DataAccessException;
 }

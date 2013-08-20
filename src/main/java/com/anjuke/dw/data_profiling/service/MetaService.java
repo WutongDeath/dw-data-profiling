@@ -179,6 +179,7 @@ public class MetaService {
             }
             table.setDatabaseId(database.getId());
             table.setName(tableName);
+            table.setStatus(Table.STATUS_UNKNOWN);
             table.setRowCount(rs.getLong("table_rows"));
             table.setDataLength(rs.getLong("data_length"));
 
@@ -195,6 +196,7 @@ public class MetaService {
                 column.setName(rs.getString("column_name"));
                 column.setType(rs.getString("column_type"));
                 column.setTypeFlag(Functions.parseTypeFlag(column.getType()));
+                column.setStats("");
                 columnList.add(column);
             }
 

@@ -20,4 +20,12 @@ public class UpdateQueueDaoImpl extends JdbcDaoSupport implements
         return getJdbcTemplate().queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
     }
 
+    @Override
+    public Integer insert(Integer tableId) throws DataAccessException {
+        UpdateQueue row = new UpdateQueue();
+        row.setTableId(tableId);
+        row.setStatus(UpdateQueue.STATUS_NEW);
+        return insert(row);
+    }
+
 }

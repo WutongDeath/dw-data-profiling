@@ -3,6 +3,9 @@ package com.anjuke.dw.data_profiling.model;
 import java.util.Date;
 
 public class UpdateQueue {
+    public static int STATUS_NEW = 1;
+    public static int STATUS_PROCESSED = 2;
+    public static int STATUS_ERROR = 3;
     private Integer id;
     private Integer tableId;
     private Integer status;

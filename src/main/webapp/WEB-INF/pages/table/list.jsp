@@ -13,6 +13,8 @@
         <th>Column Count</th>
         <th>Row Count</th>
         <th>Data Length</th>
+        <th>Status</th>
+        <th>Last Updated</th>
         <th>Operation</th>
       </tr>
       <tr>
