@@ -1,6 +1,7 @@
 package com.anjuke.dw.data_profiling.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.anjuke.dw.data_profiling.dao.ColumnDao;
 import com.anjuke.dw.data_profiling.dao.DatabaseDao;
@@ -24,6 +28,7 @@ import com.anjuke.dw.data_profiling.dao.UpdateQueueDao;
 import com.anjuke.dw.data_profiling.model.Column;
 import com.anjuke.dw.data_profiling.model.Database;
 import com.anjuke.dw.data_profiling.model.Table;
+import com.anjuke.dw.data_profiling.service.MetaService;
 import com.anjuke.dw.data_profiling.util.ResourceNotFoundException;
 
 @Controller
@@ -53,6 +58,9 @@ public class TableController {
 
     @Autowired
     private UpdateQueueDao updateQueueDao;
+
+    @Autowired
+    private MetaService metaService;
 
     @RequestMapping("/view/{tableId}")
     public String view(@PathVariable int tableId, ModelMap model) {
@@ -241,12 +249,34 @@ public class TableController {
             throw new ResourceNotFoundException();
         }
 
-        List<Table> tableList = tableDao.findByDatabaseId(databaseId);
+        List<String> tableNameList = metaService.getTableNames(database.getId());
+        if (tableNameList == null) {
+            tableNameList = new ArrayList<String>();
+        }
 
         model.addAttribute("database", database);
-        model.addAttribute("tableList", tableList);
+        model.addAttribute("tableNameList", JSONValue.toJSONString(tableNameList));
 
         return "table/list";
+    }
+
+    @RequestMapping(value="/get_info", produces="application/json")
+    @ResponseBody
+    public String getInfo(@RequestParam("database_id") int databaseId,
+            @RequestParam("tables") String tables) {
+
+        List<String> tableNameList = Arrays.asList(tables.split(","));
+        if (tableNameList.size() == 0) {
+            return "{}";
+        }
+
+        Map<String, Map<String, Object>> tableInfoMap = metaService.getTableInfo(databaseId, tableNameList);
+        if (tableInfoMap == null) {
+            return "{}";
+        }
+
+        return JSONValue.toJSONString(tableInfoMap);
+
     }
 
 }
