@@ -46,30 +46,7 @@ TableList.prototype = {
     		var $li = $(li);
 
     		$li.find('a').click(function() {
-
-    			var data = {
-    				databaseId: self.databaseId,
-    				table: tableName
-    			};
-
-    			$.getJSON('/table/get_info/', data, function(tableInfo) {
-
-    				if ($.isEmptyObject(tableInfo)) {
-    					alert("Fail to fetch table information.");
-    				    return;
-    				}
-
-    				$('#divInfo').html(self.tplInfo(tableInfo));
-    				$('#divInfo').find('a[back]').click(function() {
-    					$('#divTables').show();
-    					$('#divInfo').hide();
-    				});
-
-    				$('#divTables').hide();
-    				$('#divInfo').show();
-
-    			});
-
+    			self.refreshInfo(tableName);
     			return false;
     		});
 
@@ -123,6 +100,56 @@ TableList.prototype = {
     	self.currentPage = 1;
     	self.totalPage = Math.ceil(self.currentList.length / self.perPage);
     	self.refreshList();
+    },
+
+    refreshInfo: function(tableName) {
+    	var self = this;
+
+		var data = {
+			databaseId: self.databaseId,
+			table: tableName
+		};
+
+		$.getJSON('/table/get_info/', data, function(tableInfo) {
+
+			if ($.isEmptyObject(tableInfo)) {
+				alert("Fail to fetch table information.");
+			    return;
+			}
+
+			$('#divInfo').html(self.tplInfo(tableInfo));
+
+			$('#divInfo').find('a[back]').click(function() {
+				$('#divTables').show();
+				$('#divInfo').hide();
+			});
+
+			if (tableInfo.status == 1) { // processing
+				$('#divInfo').find('#lblStatus').addClass('label-info').text('Processing');
+				$('#divInfo').find('#btnProfiling').addClass('disabled');
+			} else {
+
+				if (tableInfo.status == 2) { // processed
+					$('#divInfo').find('#lblStatus').addClass('label-success').text('Processed');
+				} else {
+					$('#divInfo').find('#lblStatus').text('Not Profiled');
+				}
+
+				$('#divInfo').find('#btnProfiling').click(function() {
+					$.post('/table/start_profiling/', data, function(result) {
+						if (result.status == 'ok') {
+							self.refreshInfo(tableName);
+						} else {
+							alert(result.msg);
+						}
+					}, 'json');
+				});
+			}
+
+			$('#divTables').hide();
+			$('#divInfo').show();
+
+		});
     },
 
     initSearch: function() {

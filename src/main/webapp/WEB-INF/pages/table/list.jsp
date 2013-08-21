@@ -47,7 +47,7 @@ new TableList({
     <script id="tplInfo" type="text/x-handlebars-template">
       <div class="clearfix">
         <h2 class="sub-title pull-left">Table: {{tableName}}</h2>
-        <a href="javascript:void(0);" class="btn btn-link pull-left" back="back" style="margin: 7px 15px 0 0;">Back</a>
+        <a href="javascript:void(0);" class="btn btn-link pull-left" back="back" style="margin: 7px 0 0 20px;">Back</a>
       </div>
 
       <table class="table">
@@ -69,10 +69,10 @@ new TableList({
           <td>{{columnCount}}</td>
           <td>{{rowCount}}</td>
           <td>{{dataLength}}</td>
-          <td><span class="label label-success">Processed</span></td>
+          <td><span class="label" id="lblStatus"></span></td>
           <td>{{updated}}</td>
           <td>
-            <a href="#" class="btn btn-small">Profiling</a>
+            <a href="javascript:void(0);" class="btn btn-small" id="btnProfiling">Profiling</a>
           </td>
         </tr>
       </table>

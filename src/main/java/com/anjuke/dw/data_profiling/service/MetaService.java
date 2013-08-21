@@ -185,8 +185,7 @@ public class MetaService {
 
             stmt = conn.prepareStatement(
                     "SELECT column_name, column_type FROM columns"
-                    + " WHERE table_schema = ? AND table_name = ?"
-                    + " ORDER BY column_name");
+                    + " WHERE table_schema = ? AND table_name = ?");
             stmt.setString(1, database.getName());
             stmt.setString(2, tableName);
 
