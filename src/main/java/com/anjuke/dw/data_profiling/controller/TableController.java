@@ -31,6 +31,7 @@ import com.anjuke.dw.data_profiling.model.Column;
 import com.anjuke.dw.data_profiling.model.Database;
 import com.anjuke.dw.data_profiling.model.Server;
 import com.anjuke.dw.data_profiling.model.Table;
+import com.anjuke.dw.data_profiling.service.CommonService;
 import com.anjuke.dw.data_profiling.service.MetaService;
 import com.anjuke.dw.data_profiling.util.Functions;
 import com.anjuke.dw.data_profiling.util.ResourceNotFoundException;
@@ -68,6 +69,9 @@ public class TableController {
 
     @Autowired
     private MetaService metaService;
+
+    @Autowired
+    private CommonService commonService;
 
     @RequestMapping("/column/{columnId}")
     public String column(@PathVariable int columnId, ModelMap model) {
@@ -188,6 +192,7 @@ public class TableController {
 
         model.addAttribute("database", database);
         model.addAttribute("tableNameList", JSONValue.toJSONString(tableNameList));
+        model.addAttribute("navi", commonService.getNavi(databaseId));
 
         return "table/list";
     }

@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=utf-8" pageEncoding="UTF-8" %>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<t:base>
+<t:navi>
 
 <jsp:attribute name="styles">
 <link href="/resources/css/table_list.css" rel="stylesheet">
@@ -19,8 +19,6 @@ new TableList({
 </jsp:attribute>
 
 <jsp:body>
-  <t:navi>
-  <jsp:body>
 
     <form class="form-inline">
       <div class="input-prepend">
@@ -114,7 +112,5 @@ new TableList({
       </table>
     </script>
 
-  </jsp:body>
-  </t:navi>
 </jsp:body>
-</t:base>
+</t:navi>

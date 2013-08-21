@@ -13,11 +13,14 @@ import com.anjuke.dw.data_profiling.model.Database;
 
 public class DatabaseDaoImpl extends JdbcDaoSupport implements DatabaseDao {
 
+    private static String INSERT_FIELDS = "server_id, name, table_count";
+    private static String SELECT_FIELDS = "id, updated, " + INSERT_FIELDS;
+
     @Override
     public Database findById(int id) throws DataAccessException {
         try {
             return getJdbcTemplate().queryForObject(
-                    "SELECT id, server_id, name, table_count, updated FROM dp_database WHERE id = ?",
+                    "SELECT " + SELECT_FIELDS + " FROM dp_database WHERE id = ?",
                     rowMapper, id);
         } catch (IncorrectResultSizeDataAccessException e) {
             return null;
@@ -27,14 +30,14 @@ public class DatabaseDaoImpl extends JdbcDaoSupport implements DatabaseDao {
     @Override
     public List<Database> findByServerId(int serverId) throws DataAccessException {
         return getJdbcTemplate().query(
-                "SELECT id, server_id, name, table_count, updated FROM dp_database WHERE server_id = ? ORDER BY name",
+                "SELECT " + SELECT_FIELDS + " FROM dp_database WHERE server_id = ? ORDER BY name",
                 rowMapper, serverId);
     }
 
     @Override
     public Integer insert(Database database) throws DataAccessException {
         int affectedRows = getJdbcTemplate().update(
-                "INSERT INTO dp_database (server_id, name, table_count) VALUES (?, ?, ?)",
+                "INSERT INTO dp_database (" + INSERT_FIELDS + ") VALUES (?, ?, ?)",
                 database.getServerId(),
                 database.getName(),
                 database.getTableCount());
@@ -65,5 +68,12 @@ public class DatabaseDaoImpl extends JdbcDaoSupport implements DatabaseDao {
         }
 
     };
+
+    @Override
+    public List<Database> findAll() throws DataAccessException {
+        return getJdbcTemplate().query(
+                "SELECT " + SELECT_FIELDS + " FROM dp_database ORDER BY server_id, name",
+                rowMapper);
+    }
 
 }

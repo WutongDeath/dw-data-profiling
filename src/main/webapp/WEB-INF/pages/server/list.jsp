@@ -1,10 +1,8 @@
 <%@ page contentType="text/html;charset=utf-8" pageEncoding="UTF-8" %>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<t:base>
+<t:navi>
 <jsp:body>
-  <t:navi>
-  <jsp:body>
 
   <h2 class="sub-title">Server List</h2>
   <table class="table table-striped table-hover">
@@ -39,7 +37,5 @@
   </table>
   <a href="/server/add" class="btn btn-primary">Add Server</a>
 
-  </jsp:body>
-  </t:navi>
 </jsp:body>
-</t:base>
+</t:navi>

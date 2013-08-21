@@ -28,6 +28,7 @@ import com.anjuke.dw.data_profiling.model.Column;
 import com.anjuke.dw.data_profiling.model.Database;
 import com.anjuke.dw.data_profiling.model.Server;
 import com.anjuke.dw.data_profiling.model.Table;
+import com.anjuke.dw.data_profiling.service.CommonService;
 import com.anjuke.dw.data_profiling.util.ResourceNotFoundException;
 
 @Controller
@@ -46,10 +47,14 @@ public class ServerController {
     @Autowired
     private ColumnDao columnDao;
 
+    @Autowired
+    private CommonService commonService;
+
     @RequestMapping("/list")
     public String list(ModelMap model) {
         List<Server> serverList = serverDao.findAll();
         model.addAttribute("serverList", serverList);
+        model.addAttribute("navi", commonService.getNavi(null));
         return "server/list";
     }
 
