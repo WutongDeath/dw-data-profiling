@@ -28,7 +28,7 @@
       <li><a href="/server/list" style="font-weight: bold; color: gray;">Servers</a></li>
 
       <c:forEach var="server" items="${navi}">
-        <li is_server="${server.id}">
+        <li is_server="${server.id}" ${server.isChosen ? "class=\"active\"" : ""}>
           <a href="/database/list/${server.id}">
             <i class="icon-folder-${server.isExpanded ? "open" : "close"}"></i>
             ${server.name}

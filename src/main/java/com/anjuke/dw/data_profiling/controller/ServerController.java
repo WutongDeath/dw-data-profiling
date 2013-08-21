@@ -54,7 +54,7 @@ public class ServerController {
     public String list(ModelMap model) {
         List<Server> serverList = serverDao.findAll();
         model.addAttribute("serverList", serverList);
-        model.addAttribute("navi", commonService.getNavi(null));
+        model.addAttribute("navi", commonService.getNavi(null, null));
         return "server/list";
     }
 

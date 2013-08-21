@@ -12,6 +12,7 @@ import com.anjuke.dw.data_profiling.dao.DatabaseDao;
 import com.anjuke.dw.data_profiling.dao.ServerDao;
 import com.anjuke.dw.data_profiling.model.Database;
 import com.anjuke.dw.data_profiling.model.Server;
+import com.anjuke.dw.data_profiling.service.CommonService;
 import com.anjuke.dw.data_profiling.util.ResourceNotFoundException;
 
 @Controller
@@ -23,6 +24,9 @@ public class DatabaseController {
 
     @Autowired
     private DatabaseDao databaseDao;
+
+    @Autowired
+    private CommonService commonService;
 
     @RequestMapping("/list/{serverId}")
     public String list(@PathVariable int serverId, ModelMap model) {
@@ -36,6 +40,7 @@ public class DatabaseController {
 
         model.addAttribute("server", server);
         model.addAttribute("databaseList", databaseList);
+        model.addAttribute("navi", commonService.getNavi(serverId, null));
 
         return "database/list";
     }

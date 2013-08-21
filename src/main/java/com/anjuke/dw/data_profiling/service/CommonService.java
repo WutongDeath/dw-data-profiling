@@ -27,6 +27,7 @@ public class CommonService {
         private String name;
         private List<NaviDatabase> databaseList;
         private Boolean isExpanded;
+        private Boolean isChosen;
         public Integer getId() {
             return id;
         }
@@ -50,6 +51,12 @@ public class CommonService {
         }
         public void setIsExpanded(Boolean isExpanded) {
             this.isExpanded = isExpanded;
+        }
+        public Boolean getIsChosen() {
+            return isChosen;
+        }
+        public void setIsChosen(Boolean isChosen) {
+            this.isChosen = isChosen;
         }
     }
 
@@ -77,9 +84,9 @@ public class CommonService {
         }
     }
 
-    public List<NaviServer> getNavi(Integer databaseId) {
+    public List<NaviServer> getNavi(Integer serverId, Integer databaseId) {
 
-        Integer serverId = null;
+        boolean databaseIsChosen = false;
         Map<Integer, List<NaviDatabase>> serverIdDatabaseList = new HashMap<Integer, List<NaviDatabase>>();
         for (Database database : databaseDao.findAll()) {
             List<NaviDatabase> databaseList = serverIdDatabaseList.get(database.getServerId());
@@ -93,6 +100,7 @@ public class CommonService {
             if (database.getId() == databaseId) {
                 naviDatabase.setIsChosen(true);
                 serverId = database.getServerId();
+                databaseIsChosen = true;
             } else {
                 naviDatabase.setIsChosen(false);
             }
@@ -106,6 +114,7 @@ public class CommonService {
             naviServer.setName(server.getName());
             naviServer.setDatabaseList(serverIdDatabaseList.get(server.getId()));
             naviServer.setIsExpanded(server.getId() == serverId);
+            naviServer.setIsChosen(server.getId() == serverId && !databaseIsChosen);
             serverList.add(naviServer);
         }
 

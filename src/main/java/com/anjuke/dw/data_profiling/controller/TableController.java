@@ -192,7 +192,7 @@ public class TableController {
 
         model.addAttribute("database", database);
         model.addAttribute("tableNameList", JSONValue.toJSONString(tableNameList));
-        model.addAttribute("navi", commonService.getNavi(databaseId));
+        model.addAttribute("navi", commonService.getNavi(null, databaseId));
 
         return "table/list";
     }
