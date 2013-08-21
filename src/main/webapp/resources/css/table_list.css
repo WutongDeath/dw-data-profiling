@@ -1,10 +1,10 @@
-div.table-list ul {
+ul.table-list {
     padding: 0;
     margin: 0;
     list-style: none;
 }
 
-div.table-list li {
+ul.table-list li {
     padding: 0;
     margin: 0;
     list-style: none;
@@ -16,17 +16,17 @@ div.table-list li {
     word-break: break-all;
 }
 
-div.table-list a {
+ul.table-list a {
     text-decoration: none;
     display: block;
     line-height: 30px;
     padding: 0 5px 0 5px;
 }
 
-div.table-list a:hover {
+ul.table-list a:hover {
     background-color: #eee;
 }
 
-div.table-list a i {
+ul.table-list a i {
     margin-top: 3px;
 }

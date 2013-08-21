@@ -27,10 +27,21 @@ new TableList({
         <span class="add-on"><i class="icon-search"></i></span>
         <input id="txtSearch" type="text" placeholder="Table name keyword">
       </div>
-      Page: <input type="text" id="txtPage" class="input-mini"> <input type="button" value="Go" id="btnPage" class="btn">
     </form>
-    <div class="table-list clearfix" id="divTables">
-      <ul id="ulTables"></ul>
+
+    <div id="divTables">
+      <ul class="table-list clearfix" id="ulTables"></ul>
+      <div class="pagination">
+        <ul>
+          <li><a href="#">Prev</a></li>
+          <li><a href="#">1</a></li>
+          <li><a href="#">2</a></li>
+          <li><a href="#">3</a></li>
+          <li><a href="#">4</a></li>
+          <li><a href="#">5</a></li>
+          <li><a href="#">Next</a></li>
+        </ul>
+      </div>
     </div>
 
     <div class="table-info" id="divInfo" style="display: none;"></div>

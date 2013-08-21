@@ -6,7 +6,6 @@ var TableList = function(opts) {
 
 	self.initList();
 	self.initSearch();
-	self.initPagination();
 };
 
 TableList.prototype = {
@@ -20,6 +19,7 @@ TableList.prototype = {
 
     refreshList: function() {
     	var self = this;
+    	var divPagi = $('#divTables .pagination');
 
     	$('#ulTables li').remove();
 
@@ -34,6 +34,7 @@ TableList.prototype = {
 
     	if (tables.length == 0) {
     		$('<li><strong>No result.</strong></li>').appendTo('#ulTables');
+    		divPagi.hide();
     		return;
     	}
 
@@ -74,6 +75,45 @@ TableList.prototype = {
 
     		$li.appendTo('#ulTables');
     	});
+
+    	// pagination
+    	var pOffset = 0;
+    	var pStart = self.currentPage - 4;
+    	if (pStart < 1) {
+    		pOffset = 1 - pStart;
+    		pStart = 1;
+    	}
+    	var pEnd = self.currentPage + 5 + pOffset;
+    	if (pEnd > self.totalPage) {
+    		pEnd = self.totalPage;
+    	}
+
+    	divPagi.find('ul li').remove();
+    	divPagi.find('ul').append(
+    			'<li' + (self.currentPage == 1 ? ' class="disabled"' : '') + '>'
+    			+ '<a href="javascript:void(0);" page="' + (self.currentPage - 1) + '">Prev</a>'
+    			+ '</li>');
+    	for (var p = pStart; p <= pEnd; ++p) {
+    		divPagi.find('ul').append(
+    			    '<li' + (p == self.currentPage ? ' class="active"' : '') + '>'
+    			    + '<a href="javascript:void(0);" page="' + p + '">' + p + '</a>'
+    			    + '</li>');
+    	}
+    	divPagi.find('ul').append(
+    			'<li' + (self.currentPage == self.totalPage ? ' class="disabled"' : '') + '>'
+    			+ '<a href="javascript:void(0);" page="' + (self.currentPage + 1) + '">Next</a>'
+    			+ '</li>');
+
+    	divPagi.find('a').click(function() {
+    		var li = $(this).parent();
+    		if (li.is('.disabled') || li.is('.active')) {
+    			return false;
+    		}
+    		self.currentPage = parseInt($(this).attr('page'));
+    		self.refreshList();
+    	});
+
+    	divPagi.show();
 
     },
 
@@ -122,23 +162,6 @@ TableList.prototype = {
     	self.currentPage = 1;
     	self.totalPage = Math.ceil(self.currentList.length / self.perPage);
     	self.refreshList();
-    },
-
-    initPagination: function() {
-    	var self = this;
-
-    	$('#btnPage').click(function() {
-    		var page = parseInt($('#txtPage').val());
-    		if (!page) {
-    			return false;
-    		}
-    		if (page < 1 || page > self.totalPage) {
-    			return false;
-    		}
-    		self.currentPage = page;
-    		self.refreshList();
-    	});
-
     },
 
     _theEnd: undefined
