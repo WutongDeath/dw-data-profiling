@@ -1,0 +1,16 @@
+body {
+    background-image: url('/resources/images/background.png');
+}
+
+h1.site-title {
+    font-size: 30px;
+    color: gray;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+h2.sub-title {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+}

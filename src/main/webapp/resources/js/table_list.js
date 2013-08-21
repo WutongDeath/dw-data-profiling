@@ -13,15 +13,14 @@ TableList.prototype = {
 
     initList: function() {
         var self = this;
-        self.perPage = 15;
+        self.perPage = 32;
         self.resetList();
     },
 
     refreshList: function() {
     	var self = this;
 
-    	$('#tblTables tr:gt(1)').remove();
-    	$('#tblTables tr:eq(1)').show();
+    	$('#ulTables li').remove();
 
     	var tables = [];
     	var start = (self.currentPage - 1) * self.perPage;
@@ -33,80 +32,18 @@ TableList.prototype = {
     	}
 
     	if (tables.length == 0) {
-    		$('#tblTables tr:eq(1)').hide();
-    		$('<tr><td colspan="6" align="center">No Result</td></tr>').appendTo('#tblTables');
+    		$('<li><strong>No result.</strong></li>').appendTo('#ulTables');
     		return;
     	}
 
-    	var data = {
-    		databaseId: self.databaseId,
-    		tables: tables.join(',')
-    	};
-
-    	$.getJSON('/table/get_info/', data, function(tableInfo) {
-
-    		$('#tblTables tr:eq(1)').hide();
-
-    		$.each(tables, function(i, tableName) {
-
-    			if (!(tableName in tableInfo)) {
-    				return true;
-    			}
-
-    			var tr = '<tr>'
-    				   + '<td>' + (start + i + 1) + '</td>'
-    				   + '<td>' + this + '</td>'
-    				   + '<td>' + tableInfo[this].columnCount + '</td>'
-    				   + '<td>' + tableInfo[this].rowCount + '</td>'
-    				   + '<td>' + tableInfo[this].dataLength + '</td>';
-
-    			if ('status' in tableInfo[this]) {
-
-    				if (tableInfo[this].status == 1) {
-    					tr += '<td>Processing</td>';
-    				} else if (tableInfo[this].status == 2) {
-    					tr += '<td>Processed</td>';
-    				} else {
-    					tr += '<td>Unknown</td>';
-    				}
-    				tr += '<td>' + tableInfo[this].updated + '</td>';
-
-    			} else {
-    				tr += '<td>-</td><td>-</td>';
-    				tableInfo[this].status = 0;
-    			}
-
-    			var data = $.param({
-    				databaseId: self.databaseId,
-    				table: tableName
-    			});
-
-    			tr += '<td><a target="_blank" href="/column/list/?' + data + '">Detail</a>'
-    			    + ' <a href="javascript:void(0)" profile="profile">Profile</a></td>'
-    				+ '</tr>';
-
-    			var $tr = $(tr);
-    			$tr.find('a[profile]').click(function() {
-
-    				if (tableInfo[tableName].status == 1) {
-    					alert('Profiling is in progress!');
-    					return false;
-    				}
-
-    				$.post('/table/start_profiling/', data, function(result) {
-    					if (result.status == 'ok') {
-    						self.refreshList();
-    					} else {
-    						alert(result.msg);
-    					}
-    				}, 'json');
-
-    			});
-
-    			$tr.appendTo('#tblTables');
-    		});
-
+    	$.each(tables, function(i, tableName) {
+    		var li = '<li><a href="javascript:void(0);" title="' + tableName + '">'
+    			   + '<i class="icon-list-alt"></i> ' + tableName
+    			   + '</a></li>';
+    		var $li = $(li);
+    		$li.appendTo('#ulTables');
     	});
+
     },
 
     resetList: function() {

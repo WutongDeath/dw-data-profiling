@@ -1,38 +1,38 @@
-<!DOCTYPE html>
+<%@ page contentType="text/html;charset=utf-8" pageEncoding="UTF-8" %>
+<%@ taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<html>
-  <body>
-    <h1>Table List (Database: <a href="/database/list/${database.serverId}">${database.name}</a>)</h1>
+<t:base>
 
-    <p>Search: <input type="text" id="txtSearch"></p>
+<jsp:attribute name="styles">
+<link href="/resources/css/table_list.css" rel="stylesheet">
+</jsp:attribute>
 
-    <table border="1" id="tblTables">
-      <tr>
-        <th>#</th>
-        <th>Table Name</th>
-        <th>Column Count</th>
-        <th>Row Count</th>
-        <th>Data Length</th>
-        <th>Status</th>
-        <th>Last Updated</th>
-        <th>Operation</th>
-      </tr>
-      <tr>
-        <td colspan="6" align="center">
-          Loading...
-        </td>
-      </tr>
-    </table>
+<jsp:attribute name="scripts">
+<script type="text/javascript" src="/resources/js/table_list.js"></script>
+<script type="text/javascript">
+new TableList({
+  databaseId: ${database.id},
+  tableNameList: ${tableNameList}
+});
+</script>
+</jsp:attribute>
+
+<jsp:body>
+  <t:navi>
+  <jsp:body>
+
+    <div class="input-prepend">
+      <span class="add-on"><i class="icon-search"></i></span>
+      <input id="txtSearch" type="text" placeholder="Table name keyword">
+    </div>
+
+    <div class="table-list">
+      <ul id="ulTables"></ul>
+    </div>
 
     <p>Page: <input type="text" id="txtPage"> <input type="button" value="Go" id="btnPage"></p>
 
-    <script type="text/javascript" src="/webjars/jquery/1.10.2/jquery.min.js"></script>
-    <script type="text/javascript" src="/resources/js/table_list.js"></script>
-    <script type="text/javascript">
-    new TableList({
-      databaseId: ${database.id},
-      tableNameList: ${tableNameList}
-    });
-    </script>
-  </body>
-</html>
+  </jsp:body>
+  </t:navi>
+</jsp:body>
+</t:base>

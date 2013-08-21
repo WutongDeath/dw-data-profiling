@@ -1,0 +1,37 @@
+div.table-list {
+    width: 100%;
+    height: 250px;
+}
+
+div.table-list ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+div.table-list li {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    float: left;
+    width: 300px;
+    height: 30px;
+    margin-right: 5px;
+    overflow: hidden;
+    word-break: break-all;
+}
+
+div.table-list a {
+    text-decoration: none;
+    display: block;
+    line-height: 30px;
+    padding: 0 5px 0 5px;
+}
+
+div.table-list a:hover {
+    background-color: #eee;
+}
+
+div.table-list a i {
+    margin-top: 3px;
+}
