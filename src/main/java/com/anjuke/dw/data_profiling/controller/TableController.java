@@ -2,11 +2,11 @@ package com.anjuke.dw.data_profiling.controller;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
@@ -24,10 +24,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.anjuke.dw.data_profiling.dao.ColumnDao;
 import com.anjuke.dw.data_profiling.dao.DatabaseDao;
+import com.anjuke.dw.data_profiling.dao.ServerDao;
 import com.anjuke.dw.data_profiling.dao.TableDao;
 import com.anjuke.dw.data_profiling.dao.UpdateQueueDao;
 import com.anjuke.dw.data_profiling.model.Column;
 import com.anjuke.dw.data_profiling.model.Database;
+import com.anjuke.dw.data_profiling.model.Server;
 import com.anjuke.dw.data_profiling.model.Table;
 import com.anjuke.dw.data_profiling.service.MetaService;
 import com.anjuke.dw.data_profiling.util.Functions;
@@ -41,13 +43,16 @@ public class TableController {
 
     static {
         typeFlagMap = new LinkedHashMap<Integer, String>();
-        typeFlagMap.put(1, "Num");
-        typeFlagMap.put(2, "Str");
-        typeFlagMap.put(4, "Date");
+        typeFlagMap.put(1, "Numeric");
+        typeFlagMap.put(2, "String");
+        typeFlagMap.put(4, "Datetime");
     }
 
     private JSONParser parser = new JSONParser();
     private Logger logger = Logger.getLogger(TableController.class);
+
+    @Autowired
+    private ServerDao serverDao;
 
     @Autowired
     private DatabaseDao databaseDao;
@@ -192,25 +197,135 @@ public class TableController {
     @RequestMapping(value="/get_info/", produces="application/json")
     @ResponseBody
     public String getInfo(@RequestParam("databaseId") int databaseId,
-            @RequestParam("tables") String tables) {
+            @RequestParam("table") String tableName) {
 
-        List<String> tableNameList = Arrays.asList(tables.split(","));
-        if (tableNameList.size() == 0) {
+        Database database = databaseDao.findById(databaseId);
+        if (database == null) {
             return "{}";
         }
 
-        Map<String, Map<String, Object>> tableInfoMap = metaService.getTableInfo(databaseId, tableNameList);
-        if (tableInfoMap == null) {
+        Server server = serverDao.findById(database.getServerId());
+        if (server == null) {
             return "{}";
         }
 
-        for (Table table : tableDao.findByDatabaseIdAndTableNameList(databaseId, tableNameList)) {
-            Map<String, Object> info = tableInfoMap.get(table.getName());
-            info.put("status", table.getStatus());
-            info.put("updated", dfDatetime.format(table.getUpdated()));
+        Table table = tableDao.findByDatabaseIdAndTableName(databaseId, tableName);
+        List<Column> columnList;
+
+        if (table == null) {
+
+            table = new Table();
+            columnList = new ArrayList<Column>();
+            metaService.getTableColumnInfo(databaseId, tableName, table, columnList);
+            if (table.getName() == null) {
+                return "{}";
+            }
+
+        } else {
+            columnList = columnDao.findByTableId(table.getId());
         }
 
-        return JSONValue.toJSONString(tableInfoMap);
+        if (columnList.size() == 0) {
+            return "{}";
+        }
+
+        Map<String, Object> tableInfo = new HashMap<String, Object>();
+        tableInfo.put("serverName", server.getName());
+        tableInfo.put("databaseName", database.getName());
+        tableInfo.put("tableName", table.getName());
+        tableInfo.put("columnCount", table.getColumnCount());
+        tableInfo.put("rowCount", table.getRowCount());
+        tableInfo.put("dataLength", table.getDataLength());
+        tableInfo.put("status", table.getStatus());
+        if (table.getUpdated() != null) {
+            tableInfo.put("updated", dfDatetime.format(table.getUpdated()));
+        } else {
+            tableInfo.put("updated", "-");
+        }
+
+        List<Map<String, Object>> columnArray = new ArrayList<Map<String, Object>>();
+        int index = 1;
+        for (Column c : columnList) {
+
+            Map<String, Object> m = new HashMap<String, Object>();
+            columnArray.add(m);
+
+            m.put("columnIndex", index++);
+            m.put("columnName", c.getName());
+            m.put("columnType", c.getType());
+            m.put("typeFlag", c.getTypeFlag());
+
+            List<String> typeFlagString = new ArrayList<String>();
+            for (Entry<Integer, String> typeFlagEntry : typeFlagMap.entrySet()) {
+                if ((c.getTypeFlag() & typeFlagEntry.getKey()) == typeFlagEntry.getKey()) {
+                    typeFlagString.add(typeFlagEntry.getValue());
+                }
+            }
+            m.put("typeFlagString", Functions.joinString(typeFlagString, ", "));
+
+            // default
+            m.put("nullCount", "-");
+            m.put("nullPercent", "-");
+            m.put("distinctValues", "-");
+            m.put("min", "-");
+            m.put("max", "-");
+            m.put("avg", "-");
+            m.put("sd", "-");
+
+            // stats
+            JSONObject stats = null;
+            if (table.getStatus() != Table.STATUS_NEW) {
+                try {
+                    stats = (JSONObject) parser.parse(c.getStats());
+                } catch (ParseException e) {}
+            }
+
+            if (stats == null) {
+                continue;
+            }
+
+            try {
+
+                // general
+                JSONObject generalStats = (JSONObject) stats.get("general");
+                Long nullCount = (Long) generalStats.get("null");
+                m.put("nullCount", nullCount);
+                m.put("nullPercent", String.format("%.2f", nullCount * 100.0 / table.getRowCount()));
+                m.put("distinctValues", (Long) generalStats.get("distinct"));
+
+                if ((c.getTypeFlag() & 1) == 1) { // numeric
+
+                    JSONObject numericStats = (JSONObject) stats.get("numeric");
+                    m.put("min", (Double) numericStats.get("min"));
+                    m.put("max", (Double) numericStats.get("max"));
+                    m.put("avg", (Double) numericStats.get("avg"));
+                    m.put("sd", (Double) numericStats.get("sd"));
+
+                } else if ((c.getTypeFlag() & 2) == 2) { // string
+
+                    JSONObject stringStats = (JSONObject) stats.get("string");
+                    m.put("min", (Long) stringStats.get("min_length"));
+                    m.put("max", (Long) stringStats.get("max_length"));
+                    m.put("avg", (Long) stringStats.get("avg_length"));
+                    m.put("sd", "-");
+
+                } else if ((c.getTypeFlag() & 4) == 4) { // datetime
+
+                    JSONObject datetimeStats = (JSONObject) stats.get("datetime");
+                    m.put("min", (String) datetimeStats.get("min"));
+                    m.put("max", (String) datetimeStats.get("max"));
+                    m.put("avg", "-");
+                    m.put("sd", "-");
+
+                }
+
+            } catch (NullPointerException e) {}
+
+        }
+
+        tableInfo.put("columnList", columnArray);
+
+        return JSONValue.toJSONString(tableInfo);
     }
 
     @RequestMapping(value="/start_profiling/", produces="application/json")
