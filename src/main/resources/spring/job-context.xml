@@ -7,12 +7,14 @@
          http://www.springframework.org/schema/context
          http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <import resource="datasource-context.xml" />
+    <import resource="business-context.xml" />
 
-    <context:component-scan base-package="com.anjuke.dw.data_profiling.service" />
+    <context:component-scan base-package="com.anjuke.dw.data_profiling.job" />
 
-    <bean id="metaService" class="com.anjuke.dw.data_profiling.service.MetaService" />
+    <bean id="builder" class="com.anjuke.dw.data_profiling.job.Builder" />
 
-    <bean id="commonService" class="com.anjuke.dw.data_profiling.service.CommonService" />
+    <bean id="builderTask" class="com.anjuke.dw.data_profiling.job.BuilderTask"
+        scope="prototype" />
+
 
 </beans>

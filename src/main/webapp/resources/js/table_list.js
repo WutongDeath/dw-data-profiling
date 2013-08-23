@@ -124,6 +124,10 @@ TableList.prototype = {
 				$('#divInfo').hide();
 			});
 
+			$('#divInfo').find('a[refresh]').click(function() {
+				self.refreshInfo(tableName);
+			});
+
 			if (tableInfo.status == 1) { // processing
 				$('#divInfo').find('#lblStatus').addClass('label-info').text('Processing');
 				$('#divInfo').find('#btnProfiling').addClass('disabled');

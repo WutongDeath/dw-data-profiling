@@ -61,7 +61,7 @@ public class MetaService {
 
     }
 
-    private Connection openConnection(int databaseId, boolean informationSchema) {
+    public Connection openConnection(int databaseId, boolean informationSchema) {
 
         Database database = databaseDao.findById(databaseId);
         if (database == null) {
@@ -89,7 +89,7 @@ public class MetaService {
 
     }
 
-    private void closeConnection(Connection conn) {
+    public void closeConnection(Connection conn) {
         try {
             conn.close();
         } catch (SQLException e) {}

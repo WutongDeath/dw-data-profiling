@@ -73,4 +73,16 @@ public class ColumnDaoImpl extends JdbcDaoSupport implements ColumnDao {
                 columnId) > 0;
     }
 
+    @Override
+    public boolean update(Column column) throws DataAccessException {
+        return getJdbcTemplate().update(
+                "UPDATE dp_column SET name = ?, type = ?, type_flag = ?, stats = ?"
+                + " WHERE id = ?",
+                column.getName(),
+                column.getType(),
+                column.getTypeFlag(),
+                column.getStats(),
+                column.getId()) > 0;
+    }
+
 }

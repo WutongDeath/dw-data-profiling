@@ -11,4 +11,5 @@ public interface ColumnDao {
     List<Column> findByTableId(int tableId) throws DataAccessException;
     Integer insert(Column column) throws DataAccessException;
     boolean delete(int columnId) throws DataAccessException;
+    boolean update(Column column) throws DataAccessException;
 }

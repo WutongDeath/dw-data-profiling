@@ -48,6 +48,7 @@ new TableList({
       <div class="clearfix">
         <h2 class="sub-title pull-left">Table: {{tableName}}</h2>
         <a href="javascript:void(0);" class="btn btn-link pull-left" back="back" style="margin: 7px 0 0 20px;">Back</a>
+        <a href="javascript:void(0);" class="btn btn-link pull-left" refresh="refresh" style="margin-top: 7px;">Refresh</a>
       </div>
 
       <table class="table">

@@ -362,13 +362,15 @@ public class TableController {
             updateQueueDao.insert(tableId);
             return Functions.output("ok");
 
-        } else {
+        } else if (table.getStatus() != Table.STATUS_NEW) {
 
             table.setStatus(Table.STATUS_NEW);
             tableDao.update(table);
             updateQueueDao.insert(table.getId());
             return Functions.output("ok");
 
+        } else {
+            return Functions.output("error", "duplicate request");
         }
 
     }
