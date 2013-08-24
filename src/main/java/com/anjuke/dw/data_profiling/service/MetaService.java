@@ -26,7 +26,6 @@ public class MetaService {
 
     @Autowired
     private DatabaseDao databaseDao;
-
     @Autowired
     private ServerDao serverDao;
 
@@ -73,20 +72,25 @@ public class MetaService {
             return null;
         }
 
-        try {
+        return openConnectionRaw(
+                server.getHost(), server.getPort(), server.getUsername(), server.getPassword(),
+                informationSchema ? "information_schema" : database.getName());
 
-            String databaseName = informationSchema ? "information_schema" : database.getName();
+    }
+
+    public Connection openConnectionRaw(String host, Integer port, String username, String password, String database) {
+
+        try {
 
             return DriverManager.getConnection(
                     String.format(
                             "jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=UTF-8",
-                            server.getHost(), server.getPort(), databaseName),
-                            server.getUsername(), server.getPassword());
+                            host, port, database),
+                    username, password);
 
         } catch (SQLException e) {
             return null;
         }
-
     }
 
     public void closeConnection(Connection conn) {
@@ -206,6 +210,46 @@ public class MetaService {
         } finally {
             closeConnection(conn);
         }
+
+    }
+
+    public List<Database> getDatabaseList(Server server) {
+
+        List<Database> databaseList = new ArrayList<Database>();
+
+        Connection conn = openConnectionRaw(server.getHost(), server.getPort(), server.getUsername(), server.getPassword(), "information_schema");
+        if (conn == null) {
+            return databaseList;
+        }
+
+        try {
+
+            PreparedStatement stmt = conn.prepareStatement(
+                    "SELECT table_schema, COUNT(*) AS table_count FROM tables GROUP BY table_schema");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+
+                String tableSchema = rs.getString("table_schema");
+                if (tableSchema.equals("information_schema")
+                        || tableSchema.equals("performance_schema")
+                        || tableSchema.equals("mysql")
+                        || tableSchema.equals("test")
+                        || tableSchema.equals("heartbeat_db")) {
+                    continue;
+                }
+
+                Database database = new Database();
+                database.setName(rs.getString("table_schema"));
+                database.setTableCount(rs.getInt("table_count"));
+                databaseList.add(database);
+            }
+
+        } catch (SQLException e) {
+        } finally {
+            closeConnection(conn);
+        }
+
+        return databaseList;
 
     }
 
