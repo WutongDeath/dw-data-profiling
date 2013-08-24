@@ -137,7 +137,9 @@ TableList.prototype = {
 
                 if (tableInfo.status == 2) { // processed
                     $('#divInfo').find('#lblStatus').addClass('label-success').text('Processed');
-                } else {
+                } else if (tableInfo.status == 3) { // error
+                    $('#divInfo').find('#lblStatus').addClass('label-important').text('Error');
+                } else { // not profiled
                     $('#divInfo').find('#lblStatus').text('Not Profiled');
                 }
 
@@ -154,7 +156,6 @@ TableList.prototype = {
 
             $('#divTables').hide();
             $('#divInfo').show();
-
         });
     },
 
