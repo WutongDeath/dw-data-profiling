@@ -92,6 +92,7 @@ new TableList({
           <th>Max Value<br>or Length</th>
           <th>Avg Value<br>or Length</th>
           <th>Standard<br>Deviation</th>
+          <th>Last Updated</th>
           <th>Operation</th>
         </tr>
         {{#each columnList}}
@@ -107,6 +108,7 @@ new TableList({
           <td>{{max}}</td>
           <td>{{avg}}</td>
           <td>{{sd}}</td>
+          <td>{{updated}}</td>
           <td><a href="#" class="btn btn-small">Details</a></td>
         </tr>
         {{/each}}

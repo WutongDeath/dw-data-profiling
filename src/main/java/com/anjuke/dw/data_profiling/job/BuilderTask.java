@@ -70,7 +70,7 @@ public class BuilderTask implements Runnable {
                 throw new Exception("Invalid queue item.", e);
             }
 
-            Connection conn = metaService.openConnection(databaseId, false);
+            conn = metaService.openConnection(databaseId, false);
             if (conn == null) {
                 throw new Exception("Fail to connect database.");
             }
@@ -82,7 +82,7 @@ public class BuilderTask implements Runnable {
 
         } catch (Exception e) {
 
-            logger.error(e.getMessage(), e.getCause());
+            logger.error(e, e);
             updateQueueDao.updateStatus(updateQueue.getId(), UpdateQueue.STATUS_ERROR);
             if (table != null) {
                 table.setStatus(Table.STATUS_ERROR);

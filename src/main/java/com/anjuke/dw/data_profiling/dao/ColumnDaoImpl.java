@@ -42,7 +42,7 @@ public class ColumnDaoImpl extends JdbcDaoSupport implements ColumnDao {
             column.setType(rs.getString("type"));
             column.setTypeFlag(rs.getInt("type_flag"));
             column.setStats(rs.getString("stats"));
-            column.setUpdated(rs.getDate("updated"));
+            column.setUpdated(rs.getTimestamp("updated"));
             return column;
         }
 

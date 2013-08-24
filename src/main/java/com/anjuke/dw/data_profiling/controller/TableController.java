@@ -40,6 +40,7 @@ import com.anjuke.dw.data_profiling.util.ResourceNotFoundException;
 @RequestMapping("/table")
 public class TableController {
 
+    private static Logger logger = Logger.getLogger(TableController.class);
     private static final Map<Integer, String> typeFlagMap;
 
     static {
@@ -49,29 +50,23 @@ public class TableController {
         typeFlagMap.put(4, "Datetime");
     }
 
-    private JSONParser parser = new JSONParser();
-    private Logger logger = Logger.getLogger(TableController.class);
-
     @Autowired
     private ServerDao serverDao;
-
     @Autowired
     private DatabaseDao databaseDao;
-
     @Autowired
     private TableDao tableDao;
-
     @Autowired
     private ColumnDao columnDao;
-
     @Autowired
     private UpdateQueueDao updateQueueDao;
-
     @Autowired
     private MetaService metaService;
-
     @Autowired
     private CommonService commonService;
+
+    private JSONParser parser = new JSONParser();
+    private SimpleDateFormat dfDatetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @RequestMapping("/column/{columnId}")
     public String column(@PathVariable int columnId, ModelMap model) {
@@ -197,8 +192,6 @@ public class TableController {
         return "table/list";
     }
 
-    private SimpleDateFormat dfDatetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     @RequestMapping(value="/get_info/", produces="application/json")
     @ResponseBody
     public String getInfo(@RequestParam("databaseId") int databaseId,
@@ -242,11 +235,7 @@ public class TableController {
         tableInfo.put("rowCount", table.getRowCount());
         tableInfo.put("dataLength", table.getDataLength());
         tableInfo.put("status", table.getStatus());
-        if (table.getUpdated() != null) {
-            tableInfo.put("updated", dfDatetime.format(table.getUpdated()));
-        } else {
-            tableInfo.put("updated", "-");
-        }
+        tableInfo.put("updated", table.getUpdated() == null ? "-" : dfDatetime.format(table.getUpdated()));
 
         List<Map<String, Object>> columnArray = new ArrayList<Map<String, Object>>();
         int index = 1;
@@ -259,6 +248,7 @@ public class TableController {
             m.put("columnName", c.getName());
             m.put("columnType", c.getType());
             m.put("typeFlag", c.getTypeFlag());
+            m.put("updated", c.getUpdated() == null ? "-" : dfDatetime.format(c.getUpdated()));
 
             List<String> typeFlagString = new ArrayList<String>();
             for (Entry<Integer, String> typeFlagEntry : typeFlagMap.entrySet()) {
@@ -279,7 +269,7 @@ public class TableController {
 
             // stats
             JSONObject stats = null;
-            if (table.getStatus() != Table.STATUS_NEW) {
+            if (c.getStats() != null && c.getStats().length() > 0) {
                 try {
                     stats = (JSONObject) parser.parse(c.getStats());
                 } catch (ParseException e) {}
@@ -339,40 +329,81 @@ public class TableController {
             @RequestParam("table") String tableName) {
 
         Table table = tableDao.findByDatabaseIdAndTableName(databaseId, tableName);
-        if (table == null) {
+        if (table != null && table.getStatus() == Table.STATUS_NEW) {
+            return Functions.output("error", "duplicate request");
+        }
 
-            table = new Table();
-            List<Column> columnList = new ArrayList<Column>();
-            metaService.getTableColumnInfo(databaseId, tableName, table, columnList);
-            if (columnList.size() == 0) {
-                return Functions.output("error", "table not found");
+        Table tableNew = new Table();
+        List<Column> columnListNew = new ArrayList<Column>();
+        metaService.getTableColumnInfo(databaseId, tableName, tableNew, columnListNew);
+        if (columnListNew.size() == 0) {
+
+            if (table != null) { // delete
+                for (Column column : columnDao.findByTableId(table.getId())) {
+                    columnDao.delete(column.getId());
+                }
+                tableDao.delete(table.getId());
             }
 
-            table.setStatus(Table.STATUS_NEW);
-            Integer tableId = tableDao.insert(table);
+            return Functions.output("error", "table not found");
+        }
+
+        if (table == null) { // new table
+
+            tableNew.setStatus(Table.STATUS_NEW);
+            Integer tableId = tableDao.insert(tableNew);
             if (tableId == null) {
                 return Functions.output("error", "fail to insert table");
             }
 
-            for (Column column : columnList) {
+            for (Column column : columnListNew) {
                 column.setTableId(tableId);
                 columnDao.insert(column);
             }
 
             updateQueueDao.insert(tableId);
-            return Functions.output("ok");
 
-        } else if (table.getStatus() != Table.STATUS_NEW) {
+        } else { // update
 
+            table.setColumnCount(tableNew.getColumnCount());
+            table.setRowCount(tableNew.getRowCount());
+            table.setDataLength(tableNew.getDataLength());
             table.setStatus(Table.STATUS_NEW);
-            tableDao.update(table);
-            updateQueueDao.insert(table.getId());
-            return Functions.output("ok");
+            if (!tableDao.update(table)) {
+                return Functions.output("error", "fail to update table");
+            }
 
-        } else {
-            return Functions.output("error", "duplicate request");
+            Map<String, Column> columnMapNew = new HashMap<String, Column>();
+            for (Column columnNew : columnListNew) {
+                columnMapNew.put(columnNew.getName(), columnNew);
+            }
+
+            for (Column column : columnDao.findByTableId(table.getId())) {
+                Column columnNew = columnMapNew.get(column.getName());
+                if (columnNew == null) { // deleted
+                    columnDao.delete(column.getId());
+                } else {
+
+                    if (!column.getType().equals(columnNew.getType())) { // updated
+                        column.setType(columnNew.getType());
+                        column.setTypeFlag(columnNew.getTypeFlag());
+                        column.setStats("");
+                        columnDao.update(column);
+                    }
+
+                    columnMapNew.remove(column.getName());
+                }
+            }
+
+            for (Column columnNew : columnMapNew.values()) { // new
+                columnNew.setTableId(table.getId());
+                columnDao.insert(columnNew);
+            }
+
+            updateQueueDao.insert(table.getId());
         }
 
+        return Functions.output("ok");
     }
 
 }
