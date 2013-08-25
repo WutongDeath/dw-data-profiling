@@ -84,7 +84,7 @@ public class MetaService {
 
             return DriverManager.getConnection(
                     String.format(
-                            "jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=UTF-8",
+                            "jdbc:mysql://%s:%d/%s?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull",
                             host, port, database),
                     username, password);
 

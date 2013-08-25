@@ -82,7 +82,7 @@ public class BuilderTask implements Runnable {
 
         } catch (Exception e) {
 
-            logger.error(e, e);
+            logger.error(e, e.getCause());
             updateQueueDao.updateStatus(updateQueue.getId(), UpdateQueue.STATUS_ERROR);
             if (table != null) {
                 table.setStatus(Table.STATUS_ERROR);
@@ -126,17 +126,18 @@ public class BuilderTask implements Runnable {
             throw new Exception("Column list is empty.");
         }
 
-        List<String> columnMessage = new ArrayList<String>();
+        List<String> errorColumns = new ArrayList<String>();
         for (Column column : columnList) {
             try {
                 processColumn(column);
             } catch (Exception e) {
-                columnMessage.add(String.format("Column: %s, message: %s", column.getName(), e.getMessage()));
+                logger.error("Fail to process column: " + column.getName(), e);
+                errorColumns.add(column.getName());
             }
         }
 
-        if (columnMessage.size() > 0) {
-            throw new Exception(Functions.joinString(columnMessage, "\n"));
+        if (errorColumns.size() > 0) {
+            throw new Exception("Error columns: " + Functions.joinString(errorColumns, ", "));
         }
 
     }
