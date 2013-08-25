@@ -4,9 +4,11 @@
 <t:navi>
 
 <jsp:attribute name="scripts">
-<script type="text/javascript" src="/resources/js/server_list.js"></script>
+<script type="text/javascript" src="<c:url value="/resources/js/server_list.js" />"></script>
 <script type="text/javascript">
-new ServerList();
+new ServerList({
+    contextPath: '${pageContext.request.contextPath}'
+});
 </script>
 </jsp:attribute>
 
@@ -28,7 +30,7 @@ new ServerList();
     <c:forEach var="server" items="${serverList}" varStatus="status">
     <tr>
       <td>${status.index + 1}</td>
-      <td><a href="/database/list/${server.id}">${server.name}</a></td>
+      <td><a href="<c:url value="/database/list/${server.id}" />">${server.name}</a></td>
       <td>${server.host}</td>
       <td>${server.port}</td>
       <td>${server.username}</td>
@@ -36,7 +38,7 @@ new ServerList();
       <td>${server.databaseCount}</td>
       <td>${server.updated}</td>
       <td>
-        <a href="/server/delete/${server.id}" onclick="return confirm('Are you sure to delete this server?');" title="Delete">
+        <a href="<c:url value="/server/delete/${server.id}" />" onclick="return confirm('Are you sure to delete this server?');" title="Delete">
           <i class="icon-remove"></i>
         </a>
       </td>

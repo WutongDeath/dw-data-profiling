@@ -4,16 +4,17 @@
 <t:navi>
 
 <jsp:attribute name="styles">
-<link href="/resources/css/table_list.css" rel="stylesheet">
+<link href="<c:url value="/resources/css/table_list.css" />" rel="stylesheet">
 </jsp:attribute>
 
 <jsp:attribute name="scripts">
-<script type="text/javascript" src="/webjars/handlebars/1.0.0/handlebars.min.js"></script>
-<script type="text/javascript" src="/resources/js/table_list.js"></script>
+<script type="text/javascript" src="<c:url value="/webjars/handlebars/1.0.0/handlebars.min.js" />"></script>
+<script type="text/javascript" src="<c:url value="/resources/js/table_list.js" />"></script>
 <script type="text/javascript">
 new TableList({
   databaseId: ${database.id},
-  tableNameList: ${tableNameList}
+  tableNameList: ${tableNameList},
+  contextPath: '${pageContext.request.contextPath}'
 });
 </script>
 </jsp:attribute>

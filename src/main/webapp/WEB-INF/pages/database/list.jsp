@@ -16,7 +16,7 @@
     <c:forEach var="database" items="${databaseList}" varStatus="status">
     <tr>
       <td>${status.index + 1}</td>
-      <td><a href="/table/list/${database.id}">${database.name}</a></td>
+      <td><a href="<c:url value="/table/list/${database.id}" />">${database.name}</a></td>
       <td>${database.tableCount}</td>
       <td>${database.updated}</td>
       <td>-</td>

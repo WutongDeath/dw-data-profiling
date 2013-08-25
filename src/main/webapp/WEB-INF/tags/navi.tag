@@ -25,11 +25,11 @@
 <div class="row-fluid">
   <div class="span2 well" style="padding: 10px 0 10px 0;">
     <ul class="nav nav-list" id="ulNavi">
-      <li><a href="/server/list" style="font-weight: bold; color: gray;">Servers</a></li>
+      <li><a href="<c:url value="/server/list" />" style="font-weight: bold; color: gray;">Servers</a></li>
 
       <c:forEach var="server" items="${navi}">
         <li is_server="${server.id}" ${server.isChosen ? "class=\"active\"" : ""}>
-          <a href="/database/list/${server.id}">
+          <a href="<c:url value="/database/list/${server.id}" />">
             <i class="icon-folder-${server.isExpanded ? "open" : "close"}"></i>
             ${server.name}
           </a>
@@ -40,7 +40,7 @@
           ${server.isExpanded ? "" : "style=\"display: none;\""}
           ${database.isChosen ? "class=\"active\"" : ""}
           >
-            <a href="/table/list/${database.id}">
+            <a href="<c:url value="/table/list/${database.id}" />">
               <i class="icon-blank"></i> <i class="icon-hdd"></i>
               ${database.name}
             </a>

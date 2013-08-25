@@ -1,5 +1,6 @@
 var ServerList = function(opts) {
     var self = this;
+    self.contextPath = opts.contextPath;
     self.initDialog();
 };
 
@@ -25,7 +26,7 @@ ServerList.prototype = {
                 return false;
             }
 
-            $.post('/server/add/', data, function(result) {
+            $.post(self.contextPath + '/server/add/', data, function(result) {
                 if (result.status == 'ok') {
                     window.location.reload();
                 } else {

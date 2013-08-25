@@ -2,6 +2,7 @@ var TableList = function(opts) {
     var self = this;
     self.databaseId = opts.databaseId;
     self.tableNameList = opts.tableNameList;
+    self.contextPath = opts.contextPath;
     self.tplInfo = Handlebars.compile($('#tplInfo').html());
 
     self.initList();
@@ -40,7 +41,8 @@ TableList.prototype = {
 
         $.each(tables, function(i, tableName) {
             var li = '<li>'
-                   + '<a href="/table/list/' + self.databaseId + '?' + $.param({table: tableName}) + '" title="' + tableName + '">'
+                   + '<a href="' + self.contextPath + '/table/list/' + self.databaseId
+                   + '?' + $.param({table: tableName}) + '" title="' + tableName + '">'
                    + '<i class="icon-list-alt"></i> ' + tableName
                    + '</a></li>';
             var $li = $(li);
@@ -110,7 +112,7 @@ TableList.prototype = {
             table: tableName
         };
 
-        $.getJSON('/table/get_info/', data, function(tableInfo) {
+        $.getJSON(self.contextPath + '/table/get_info/', data, function(tableInfo) {
 
             if ($.isEmptyObject(tableInfo)) {
                 alert("Fail to fetch table information.");
@@ -144,7 +146,7 @@ TableList.prototype = {
                 }
 
                 $('#divInfo').find('#btnProfiling').click(function() {
-                    $.post('/table/start_profiling/', data, function(result) {
+                    $.post(self.contextPath + '/table/start_profiling/', data, function(result) {
                         if (result.status == 'ok') {
                             self.refreshInfo(tableName);
                         } else {
