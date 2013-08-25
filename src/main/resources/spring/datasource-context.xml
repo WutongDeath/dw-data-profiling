@@ -8,7 +8,8 @@
          http://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:property-placeholder
-        location="classpath:spring/datasource.properties" />
+        location="classpath:spring/datasource.properties,file:/data2/data-profiling/datasource.properties"
+        ignore-resource-not-found="true" />
 
     <bean id="statsDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
         destroy-method="close" p:driverClass="${jdbc.driverClassName}"
