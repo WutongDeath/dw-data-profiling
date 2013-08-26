@@ -158,7 +158,7 @@ public class TableController {
                 datetimeStatsMap.put("max", (String) datetimeStats.get("max"));
                 datetimeStatsMap.put("minDate", (String) datetimeStats.get("min_date"));
                 datetimeStatsMap.put("maxDate", (String) datetimeStats.get("max_date"));
-                datetimeStatsMap.put("maxTime", (String) datetimeStats.get("max_time"));
+                datetimeStatsMap.put("minTime", (String) datetimeStats.get("max_time"));
                 datetimeStatsMap.put("maxTime", (String) datetimeStats.get("max_time"));
                 datetimeStatsMap.put("top10", (JSONArray) datetimeStats.get("top10"));
                 datetimeStatsMap.put("bottom10", (JSONArray) datetimeStats.get("bottom10"));
