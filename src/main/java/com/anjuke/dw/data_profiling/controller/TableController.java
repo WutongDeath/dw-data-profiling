@@ -69,7 +69,7 @@ public class TableController {
     private JSONParser parser = new JSONParser();
     private SimpleDateFormat dfDatetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    @RequestMapping("/get_column_details")
+    @RequestMapping(value="/get_column_details", produces="application/json; charset=utf-8")
     @ResponseBody
     public String column(@RequestParam("columnId") int columnId) {
 
@@ -192,7 +192,7 @@ public class TableController {
         return "table/list";
     }
 
-    @RequestMapping(value="/get_info/", produces="application/json")
+    @RequestMapping(value="/get_info/", produces="application/json; charset=utf-8")
     @ResponseBody
     public String getInfo(@RequestParam("databaseId") int databaseId,
             @RequestParam("table") String tableName) {
@@ -327,7 +327,7 @@ public class TableController {
         return JSONValue.toJSONString(tableInfo);
     }
 
-    @RequestMapping(value="/start_profiling/", produces="application/json")
+    @RequestMapping(value="/start_profiling/", produces="application/json; charset=utf-8")
     @ResponseBody
     public String startProfiling(@RequestParam("databaseId") int databaseId,
             @RequestParam("table") String tableName) {

@@ -55,7 +55,7 @@ public class ServerController {
         return "server/list";
     }
 
-    @RequestMapping(value="/add", method=RequestMethod.POST)
+    @RequestMapping(value="/add", method=RequestMethod.POST, produces="application/json; charset=utf-8")
     @ResponseBody
     public String addSubmit(@Valid @ModelAttribute("serverForm") ServerForm serverForm,
             BindingResult result, ModelMap model) {

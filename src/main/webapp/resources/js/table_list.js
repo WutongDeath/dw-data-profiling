@@ -174,6 +174,8 @@ TableList.prototype = {
                 		return;
                 	}
 
+                	columnInfo.rowCount = tableInfo.rowCount;
+
                 	var typeFlag = parseInt(columnInfo.typeFlag);
                 	columnInfo.hasNumericStats = (typeFlag & 1) == 1 && !$.isEmptyObject(columnInfo.numericStats);
                 	if (columnInfo.hasNumericStats) {

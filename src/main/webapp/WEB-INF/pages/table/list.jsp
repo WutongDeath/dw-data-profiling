@@ -146,7 +146,7 @@ new TableList({
       </tr>
       <tr>
         <td>{{columnType}}</td>
-        <td>-</td>
+        <td>{{rowCount}}</td>
         <td>{{generalStats.nullCount}}</td>
         <td>{{generalStats.nullPercent}}</td>
         <td>{{generalStats.distinctValues}}</td>
