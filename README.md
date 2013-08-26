@@ -20,6 +20,8 @@ Packaging
 
 ### WAR
 
+Download Jetty runner Jar from [Maven](http://search.maven.org/#search%7Cga%7C1%7Cjetty-runner).
+
 ```
 $ mvn clean package
 $ java -jar jetty-runner.jar --port 8191 --path /dp target/dw-data-profiling-0.0.1-SNAPSHOT.war
