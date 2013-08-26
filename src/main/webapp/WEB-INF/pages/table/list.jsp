@@ -45,6 +45,17 @@ new TableList({
 
     <div class="table-info" id="divInfo" style="display: none;"></div>
 
+<div class="modal hide" id="dlgDetails">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h3></h3>
+  </div>
+  <div class="modal-body"></div>
+  <div class="modal-footer">
+    <a href="javascript:void(0);" class="btn" data-dismiss="modal">Close</a>
+  </div>
+</div>
+
     <script id="tplInfo" type="text/x-handlebars-template">
       <div class="clearfix">
         <h2 class="sub-title pull-left">Table: {{tableName}}</h2>
@@ -110,10 +121,124 @@ new TableList({
           <td>{{avg}}</td>
           <td>{{sd}}</td>
           <td>{{updated}}</td>
-          <td><a href="javascript:void(0);" class="btn btn-small" details="details">Details</a></td>
+          <td>
+            {{#if hasDetails}}
+            <a href="javascript:void(0);" class="btn btn-small" details="{{columnId}}">Details</a>
+            {{else}}
+            <a href="javascript:void(0);" class="btn btn-small disabled">Details</a>
+            {{/if}}
+          </td>
         </tr>
         {{/each}}
       </table>
+    </script>
+
+    <script id="tplDetails" type="text/x-handlebars-template">
+    <h4>General Information</h4>
+    <table class="table table-condensed">
+      <tr>
+        <th>Data Type</th>
+        <th>Row Count</th>
+        <th>Null Count</th>
+        <th>Null Percent</th>
+        <th>Distinct Values</th>
+        <th>Analyze Type</th>
+      </tr>
+      <tr>
+        <td>{{columnType}}</td>
+        <td>-</td>
+        <td>{{generalStats.nullCount}}</td>
+        <td>{{generalStats.nullPercent}}</td>
+        <td>{{generalStats.distinctValues}}</td>
+        <td>{{typeFlagString}}</td>
+      </tr>
+    </table>
+
+    {{#if hasNumericStats}}
+    <h4>Numeric Analyzer</h4>
+    <table class="table table-condensed">
+      <tr>
+        <th>Min Value</th>
+        <th>Max Value</th>
+        <th>Avg Value</th>
+        <th>Standard Deviation</th>
+      </tr>
+      <tr>
+        <td>{{numericStats.min}}</td>
+        <td>{{numericStats.max}}</td>
+        <td>{{numericStats.avg}}</td>
+        <td>{{numericStats.sd}}</td>
+      </tr>
+      <tr>
+        <th colspan="2">Top 10</th>
+        <th colspan="2">Bottom 10</th>
+      </tr>
+      <tr>
+        <td colspan="2">{{{numericStats.top10String}}}</td>
+        <td colspan="2">{{{numericStats.bottom10String}}}</td>
+      </tr>
+    </table>
+    {{/if}}
+
+    {{#if hasStringStats}}
+    <h4>String Analyzer</h4>
+    <table class="table table-condensed">
+      <tr>
+        <th>Min Length</th>
+        <th>Max Length</th>
+        <th>Avg Length</th>
+        <th>&nbsp;</th>
+      </tr>
+      <tr>
+        <td>{{stringStats.minLength}}</td>
+        <td>{{stringStats.maxLength}}</td>
+        <td>{{stringStats.avgLength}}</td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <th colspan="2">Top 10</th>
+        <th colspan="2">Bottom 10</th>
+      </tr>
+      <tr>
+        <td colspan="2">{{{stringStats.top10String}}}</td>
+        <td colspan="2">{{{stringStats.bottom10String}}}</td>
+      </tr>
+    </table>
+    {{/if}}
+
+    {{#if hasDatetimeStats}}
+    <h4>Datetime Analyzer</h4>
+    <table class="table table-condensed">
+      <tr>
+        <th colspan="2">Min Value</th>
+        <th colspan="2">Max Value</th>
+      </tr>
+      <tr>
+        <td colspan="2">{{datetimeStats.min}}</td>
+        <td colspan="2">{{datetimeStats.max}}</td>
+      </tr>
+      <tr>
+        <th>Min Date</th>
+        <th>Max Date</th>
+        <th>Min Time</th>
+        <th>Max Time</th>
+      </tr>
+      <tr>
+        <td>{{datetimeStats.minDate}}</td>
+        <td>{{datetimeStats.maxDate}}</td>
+        <td>{{datetimeStats.minTime}}</td>
+        <td>{{datetimeStats.maxTime}}</td>
+      </tr>
+      <tr>
+        <th colspan="2">Top 10</th>
+        <th colspan="2">Bottom 10</th>
+      </tr>
+      <tr>
+        <td colspan="2">{{{datetimeStats.top10String}}}</td>
+        <td colspan="2">{{{datetimeStats.bottom10String}}}</td>
+      </tr>
+    </table>
+    {{/if}}
     </script>
 
 </jsp:body>

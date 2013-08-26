@@ -40,6 +40,7 @@ import com.anjuke.dw.data_profiling.util.ResourceNotFoundException;
 @RequestMapping("/table")
 public class TableController {
 
+    @SuppressWarnings("unused")
     private static Logger logger = Logger.getLogger(TableController.class);
     private static final Map<Integer, String> typeFlagMap;
 
@@ -68,17 +69,18 @@ public class TableController {
     private JSONParser parser = new JSONParser();
     private SimpleDateFormat dfDatetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    @RequestMapping("/column/{columnId}")
-    public String column(@PathVariable int columnId, ModelMap model) {
+    @RequestMapping("/get_column_details")
+    @ResponseBody
+    public String column(@RequestParam("columnId") int columnId) {
 
         Column column = columnDao.findById(columnId);
         if (column == null) {
-            throw new ResourceNotFoundException();
+            return "{}";
         }
 
         Table table = tableDao.findById(column.getTableId());
         if (table == null) {
-            throw new ResourceNotFoundException();
+            return "{}";
         }
 
         Column c = column;
@@ -87,89 +89,87 @@ public class TableController {
         try {
             stats = (JSONObject) parser.parse(c.getStats());
         } catch (ParseException e) {
-            logger.warn("Invalid column stats.", e);
-            return "redirect:/table/view/" + table.getId();
+            return "{}";
         }
 
-        // general
-        Map<String, Object> generalStatsMap = new HashMap<String, Object>();
-        model.addAttribute("generalStats", generalStatsMap);
+        Map<String, Object> model = new HashMap<String, Object>();
 
-        JSONObject generalStats = (JSONObject) stats.get("general");
-        Long nullCount = (Long) generalStats.get("null");
-        generalStatsMap.put("nullCount", nullCount);
-        generalStatsMap.put("nullPercent", String.format("%.2f", nullCount * 100.0 / table.getRowCount()));
-        generalStatsMap.put("distinctValues", (Long) generalStats.get("distinct"));
+        model.put("columnId", c.getId());
+        model.put("columnName", c.getName());
+        model.put("columnType", c.getType());
+        model.put("typeFlag", c.getTypeFlag());
+        model.put("updated", c.getUpdated() == null ? "-" : dfDatetime.format(c.getUpdated()));
 
-        if ((c.getTypeFlag() & 1) == 1) { // numeric
-
-            Map<String, Object> numericStatsMap = new HashMap<String, Object>();
-            model.addAttribute("numericStats", numericStatsMap);
-
-            JSONObject numericStats = (JSONObject) stats.get("numeric");
-            numericStatsMap.put("min", (Double) numericStats.get("min"));
-            numericStatsMap.put("max", (Double) numericStats.get("max"));
-            numericStatsMap.put("avg", (Double) numericStats.get("avg"));
-            numericStatsMap.put("sd", (Double) numericStats.get("sd"));
-
-            JSONArray numericTop10 = (JSONArray) numericStats.get("top10");
-            Map<String, Long> numericTop10Map = new LinkedHashMap<String, Long>();
-            for (int i = 0; i < numericTop10.size(); i += 2) {
-                numericTop10Map.put((String) numericTop10.get(i), (Long) numericTop10.get(i + 1));
+        List<String> typeFlagString = new ArrayList<String>();
+        for (Entry<Integer, String> typeFlagEntry : typeFlagMap.entrySet()) {
+            if ((c.getTypeFlag() & typeFlagEntry.getKey()) == typeFlagEntry.getKey()) {
+                typeFlagString.add(typeFlagEntry.getValue());
             }
-            numericStatsMap.put("top10", numericTop10Map);
+        }
+        model.put("typeFlagString", Functions.joinString(typeFlagString, ", "));
 
-            JSONArray numericBottom10 = (JSONArray) numericStats.get("bottom10");
-            Map<String, Long> numericBottom10Map = new LinkedHashMap<String, Long>();
-            for (int i = 0; i < numericBottom10.size(); i += 2) {
-                numericBottom10Map.put((String) numericBottom10.get(i), (Long) numericBottom10.get(i + 1));
+        try {
+
+            // general
+            Map<String, Object> generalStatsMap = new HashMap<String, Object>();
+            model.put("generalStats", generalStatsMap);
+
+            JSONObject generalStats = (JSONObject) stats.get("general");
+            Long nullCount = (Long) generalStats.get("null");
+            generalStatsMap.put("nullCount", nullCount);
+            generalStatsMap.put("nullPercent", String.format("%.2f", nullCount * 100.0 / table.getRowCount()));
+            generalStatsMap.put("distinctValues", (Long) generalStats.get("distinct"));
+
+            if ((c.getTypeFlag() & 1) == 1) { // numeric
+
+                Map<String, Object> numericStatsMap = new HashMap<String, Object>();
+                model.put("numericStats", numericStatsMap);
+
+                JSONObject numericStats = (JSONObject) stats.get("numeric");
+                numericStatsMap.put("min", (Double) numericStats.get("min"));
+                numericStatsMap.put("max", (Double) numericStats.get("max"));
+                numericStatsMap.put("avg", (Double) numericStats.get("avg"));
+                numericStatsMap.put("sd", (Double) numericStats.get("sd"));
+                numericStatsMap.put("top10", (JSONArray) numericStats.get("top10"));
+                numericStatsMap.put("bottom10", (JSONArray) numericStats.get("bottom10"));
             }
-            numericStatsMap.put("bottom10", numericBottom10Map);
+
+            if ((c.getTypeFlag() & 2) == 2) { // string
+
+                Map<String, Object> stringStatsMap = new HashMap<String, Object>();
+                model.put("stringStats", stringStatsMap);
+
+                JSONObject stringStats = (JSONObject) stats.get("string");
+                stringStatsMap.put("minLength", (Long) stringStats.get("min_length"));
+                stringStatsMap.put("maxLength", (Long) stringStats.get("max_length"));
+                stringStatsMap.put("avgLength", (Long) stringStats.get("avg_length"));
+                stringStatsMap.put("top10", (JSONArray) stringStats.get("top10"));
+                stringStatsMap.put("bottom10", (JSONArray) stringStats.get("bottom10"));
+
+            }
+
+            if ((c.getTypeFlag() & 4) == 4) { // datetime
+
+                Map<String, Object> datetimeStatsMap = new HashMap<String, Object>();
+                model.put("datetimeStats", datetimeStatsMap);
+
+                JSONObject datetimeStats = (JSONObject) stats.get("datetime");
+                datetimeStatsMap.put("min", (String) datetimeStats.get("min"));
+                datetimeStatsMap.put("max", (String) datetimeStats.get("max"));
+                datetimeStatsMap.put("minDate", (String) datetimeStats.get("min_date"));
+                datetimeStatsMap.put("maxDate", (String) datetimeStats.get("max_date"));
+                datetimeStatsMap.put("maxTime", (String) datetimeStats.get("max_time"));
+                datetimeStatsMap.put("maxTime", (String) datetimeStats.get("max_time"));
+                datetimeStatsMap.put("top10", (JSONArray) datetimeStats.get("top10"));
+                datetimeStatsMap.put("bottom10", (JSONArray) datetimeStats.get("bottom10"));
+
+            }
+
+        } catch (Exception e) {
+            return "{}";
         }
 
-        if ((c.getTypeFlag() & 2) == 2) { // string
-
-            Map<String, Object> stringStatsMap = new HashMap<String, Object>();
-            model.addAttribute("stringStats", stringStatsMap);
-
-            JSONObject stringStats = (JSONObject) stats.get("string");
-            stringStatsMap.put("minLength", (Long) stringStats.get("min_length"));
-            stringStatsMap.put("maxLength", (Long) stringStats.get("max_length"));
-            stringStatsMap.put("avgLength", (Long) stringStats.get("avg_length"));
-
-            JSONArray stringTop10 = (JSONArray) stringStats.get("top10");
-            Map<String, Long> stringTop10Map = new LinkedHashMap<String, Long>();
-            for (int i = 0; i < stringTop10.size(); i += 2) {
-                stringTop10Map.put((String) stringTop10.get(i), (Long) stringTop10.get(i + 1));
-            }
-            stringStatsMap.put("top10", stringTop10Map);
-            logger.info(stringTop10Map);
-
-            JSONArray stringBottom10 = (JSONArray) stringStats.get("bottom10");
-            Map<String, Long> stringBottom10Map = new LinkedHashMap<String, Long>();
-            for (int i = 0; i < stringBottom10.size(); i += 2) {
-                stringBottom10Map.put((String) stringBottom10.get(i), (Long) stringBottom10.get(i + 1));
-            }
-            stringStatsMap.put("bottom10", stringBottom10Map);
-
-        }
-
-        if ((c.getTypeFlag() & 4) == 4) { // datetime
-
-            Map<String, Object> datetimeStatsMap = new HashMap<String, Object>();
-            model.addAttribute("datetimeStats", datetimeStatsMap);
-
-            JSONObject datetimeStats = (JSONObject) stats.get("datetime");
-            datetimeStatsMap.put("min", (String) datetimeStats.get("min"));
-            datetimeStatsMap.put("max", (String) datetimeStats.get("max"));
-
-        }
-
-        model.addAttribute("table", table);
-        model.addAttribute("column", column);
-        model.addAttribute("typeFlagMap", typeFlagMap);
-
-        return "table/column";
+        return JSONValue.toJSONString(model);
     }
 
     @RequestMapping("/list/{databaseId}")
@@ -244,6 +244,7 @@ public class TableController {
             Map<String, Object> m = new HashMap<String, Object>();
             columnArray.add(m);
 
+            m.put("columnId", c.getId());
             m.put("columnIndex", index++);
             m.put("columnName", c.getName());
             m.put("columnType", c.getType());
@@ -266,6 +267,7 @@ public class TableController {
             m.put("max", "-");
             m.put("avg", "-");
             m.put("sd", "-");
+            m.put("hasDetails", false);
 
             // stats
             JSONObject stats = null;
@@ -313,6 +315,8 @@ public class TableController {
                     m.put("sd", "-");
 
                 }
+
+                m.put("hasDetails", true);
 
             } catch (NullPointerException e) {}
 

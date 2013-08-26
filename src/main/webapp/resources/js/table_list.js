@@ -4,6 +4,7 @@ var TableList = function(opts) {
     self.tableNameList = opts.tableNameList;
     self.contextPath = opts.contextPath;
     self.tplInfo = Handlebars.compile($('#tplInfo').html());
+    self.tplDetails = Handlebars.compile($('#tplDetails').html());
 
     self.initList();
     self.initSearch();
@@ -161,6 +162,67 @@ TableList.prototype = {
 	                });
                 }
             }
+
+            $('#divInfo').find('a[details]').click(function() {
+            	var data = {
+            		columnId: $(this).attr('details')
+            	};
+                $.getJSON(self.contextPath + '/table/get_column_details/', data, function(columnInfo) {
+
+                	if ($.isEmptyObject(columnInfo)) {
+                		alert('Fail to get column details.');
+                		return;
+                	}
+
+                	var typeFlag = parseInt(columnInfo.typeFlag);
+                	columnInfo.hasNumericStats = (typeFlag & 1) == 1 && !$.isEmptyObject(columnInfo.numericStats);
+                	if (columnInfo.hasNumericStats) {
+	                	columnInfo.numericStats.top10String = '';
+	                	for (var i = 0; i < columnInfo.numericStats.top10.length; i += 2) {
+	                		columnInfo.numericStats.top10String += columnInfo.numericStats.top10[i] + ': '
+	                		        + columnInfo.numericStats.top10[i+1] + '<br>';
+	                	}
+	                	columnInfo.numericStats.bottom10String = '';
+	                	for (var i = 0; i < columnInfo.numericStats.bottom10.length; i += 2) {
+	                		columnInfo.numericStats.bottom10String += columnInfo.numericStats.bottom10[i] + ': '
+	                		        + columnInfo.numericStats.bottom10[i+1] + '<br>';
+	                	}
+                	}
+
+                	columnInfo.hasStringStats = (typeFlag & 2) == 2 && !$.isEmptyObject(columnInfo.stringStats);
+                	if (columnInfo.hasStringStats) {
+                		columnInfo.stringStats.top10String = '';
+	                	for (var i = 0; i < columnInfo.stringStats.top10.length; i += 2) {
+	                		columnInfo.stringStats.top10String += columnInfo.stringStats.top10[i] + ': '
+	                		        + columnInfo.stringStats.top10[i+1] + '<br>';
+	                	}
+	                	columnInfo.stringStats.bottom10String = '';
+	                	for (var i = 0; i < columnInfo.stringStats.bottom10.length; i += 2) {
+	                		columnInfo.stringStats.bottom10String += columnInfo.stringStats.bottom10[i] + ': '
+	                		        + columnInfo.stringStats.bottom10[i+1] + '<br>';
+	                	}
+                	}
+
+                	columnInfo.hasDatetimeStats = (typeFlag & 4) == 4 && !$.isEmptyObject(columnInfo.datetimeStats);
+                	if (columnInfo.hasDatetimeStats) {
+                		columnInfo.datetimeStats.top10String = '';
+	                	for (var i = 0; i < columnInfo.datetimeStats.top10.length; i += 2) {
+	                		columnInfo.datetimeStats.top10String += columnInfo.datetimeStats.top10[i] + ': '
+	                		        + columnInfo.datetimeStats.top10[i+1] + '<br>';
+	                	}
+	                	columnInfo.datetimeStats.bottom10String = '';
+	                	for (var i = 0; i < columnInfo.datetimeStats.bottom10.length; i += 2) {
+	                		columnInfo.datetimeStats.bottom10String += columnInfo.datetimeStats.bottom10[i] + ': '
+	                		        + columnInfo.datetimeStats.bottom10[i+1] + '<br>';
+	                	}
+                	}
+
+
+                	$('#dlgDetails h3').text('Column: ' + columnInfo.columnName);
+                	$('#dlgDetails .modal-body').html(self.tplDetails(columnInfo));
+                	$('#dlgDetails').modal('show');
+                });
+            });
 
             $('#divTables').hide();
             $('#divInfo').show();
