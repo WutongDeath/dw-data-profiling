@@ -133,8 +133,10 @@ TableList.prototype = {
             });
 
             if (tableInfo.status == 1) { // processing
+
                 $('#divInfo').find('#lblStatus').addClass('label-info').text('Processing');
                 $('#divInfo').find('#btnProfiling').addClass('disabled');
+
             } else {
 
                 if (tableInfo.status == 2) { // processed
@@ -145,15 +147,19 @@ TableList.prototype = {
                     $('#divInfo').find('#lblStatus').text('Not Profiled');
                 }
 
-                $('#divInfo').find('#btnProfiling').click(function() {
-                    $.post(self.contextPath + '/table/start_profiling/', data, function(result) {
-                        if (result.status == 'ok') {
-                            self.refreshInfo(tableName);
-                        } else {
-                            alert(result.msg);
-                        }
-                    }, 'json');
-                });
+                if (tableInfo.rowCount == 0 || tableInfo.dataLength > 512 * 1024 * 1024) {
+                	$('#divInfo').find('#btnProfiling').addClass('disabled').attr('title', 'No data or too large.');
+                } else {
+	                $('#divInfo').find('#btnProfiling').click(function() {
+	                    $.post(self.contextPath + '/table/start_profiling/', data, function(result) {
+	                        if (result.status == 'ok') {
+	                            self.refreshInfo(tableName);
+	                        } else {
+	                            alert(result.msg);
+	                        }
+	                    }, 'json');
+	                });
+                }
             }
 
             $('#divTables').hide();

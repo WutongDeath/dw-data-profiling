@@ -110,7 +110,7 @@ new TableList({
           <td>{{avg}}</td>
           <td>{{sd}}</td>
           <td>{{updated}}</td>
-          <td><a href="#" class="btn btn-small">Details</a></td>
+          <td><a href="javascript:void(0);" class="btn btn-small" details="details">Details</a></td>
         </tr>
         {{/each}}
       </table>
