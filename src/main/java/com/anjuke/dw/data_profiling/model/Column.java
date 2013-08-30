@@ -9,6 +9,7 @@ public class Column {
     private String type;
     private Integer typeFlag;
     private String stats;
+    private String comment;
     private Date updated;
     public Integer getId() {
         return id;
@@ -45,6 +46,12 @@ public class Column {
     }
     public void setStats(String stats) {
         this.stats = stats;
+    }
+    public String getComment() {
+        return comment;
+    }
+    public void setComment(String comment) {
+        this.comment = comment;
     }
     public Date getUpdated() {
         return updated;

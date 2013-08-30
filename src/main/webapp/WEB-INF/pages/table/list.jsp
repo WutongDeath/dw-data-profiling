@@ -110,7 +110,7 @@ new TableList({
         {{#each columnList}}
         <tr>
           <td>{{columnIndex}}</td>
-          <td>{{columnName}}</td>
+          <td><span comment="comment" title="{{comment}}">{{columnName}}</span></td>
           <td>{{columnType}}</td>
           <td><a href="javascript:void(0);"><i class="icon-edit"></i></a> {{typeFlagString}}</td>
           <td>{{nullCount}}</td>
