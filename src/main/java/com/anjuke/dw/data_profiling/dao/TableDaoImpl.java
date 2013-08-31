@@ -1,5 +1,7 @@
 package com.anjuke.dw.data_profiling.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -7,8 +9,11 @@ import java.util.List;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import com.anjuke.dw.data_profiling.model.Table;
 import com.anjuke.dw.data_profiling.util.Functions;
@@ -63,22 +68,34 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
     }
 
     @Override
-    public Integer insert(Table table) throws DataAccessException {
+    public Integer insert(final Table table) throws DataAccessException {
 
-        int rows = getJdbcTemplate().update(
-                "INSERT INTO dp_table (" + INSERT_FIELDS + ") VALUES (?, ?, ?, ?, ?, ?)",
-                table.getDatabaseId(),
-                table.getName(),
-                table.getStatus(),
-                table.getColumnCount(),
-                table.getRowCount(),
-                table.getDataLength());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        int rows = getJdbcTemplate().update(new PreparedStatementCreator() {
+
+            @Override
+            public PreparedStatement createPreparedStatement(Connection con)
+                    throws SQLException {
+                PreparedStatement ps = con.prepareStatement(
+                        "INSERT INTO dp_table (" + INSERT_FIELDS + ") VALUES (?, ?, ?, ?, ?, ?)",
+                        new String[] { "id" });
+                ps.setInt(1, table.getDatabaseId());
+                ps.setString(2, table.getName());
+                ps.setInt(3, table.getStatus());
+                ps.setInt(4, table.getColumnCount());
+                ps.setLong(5, table.getRowCount());
+                ps.setLong(6, table.getDataLength());
+                return ps;
+            }
+
+        }, keyHolder);
 
         if (rows == 0) {
             return null;
         }
 
-        return getJdbcTemplate().queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+        return keyHolder.getKey().intValue();
     }
 
     @Override
