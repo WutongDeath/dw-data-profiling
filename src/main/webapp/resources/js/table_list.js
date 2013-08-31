@@ -145,18 +145,25 @@ TableList.prototype = {
 
             if (tableInfo.status == 1) { // processing
 
-                $('#divInfo').find('#lblStatus').addClass('label-info').text(tableInfo.progress + '%');
+                $('#divInfo').find('#tdStatus').html(
+                        '<div class="progress progress-striped active" style="width: 60px; float: left; margin-right: 10px;">'
+                        + '<div class="bar" style="width: ' + tableInfo.progress + '%;"></div>'
+                        + '</div>'
+                        + tableInfo.progress + '%');
+
                 $('#divInfo').find('#btnProfiling').addClass('disabled');
 
             } else {
 
+                var lblStatus;
                 if (tableInfo.status == 2) { // processed
-                    $('#divInfo').find('#lblStatus').addClass('label-success').text('Processed');
+                    lblStatus = '<span class="label label-success">Processed</span>';
                 } else if (tableInfo.status == 3) { // error
-                    $('#divInfo').find('#lblStatus').addClass('label-important').text('Error');
+                    lblStatus = '<span class="label label-important">Error</span>';
                 } else { // not profiled
-                    $('#divInfo').find('#lblStatus').text('Not Profiled');
+                    lblStatus = '<span class="label">Not Profiled</span>';
                 }
+                $('#divInfo').find('#tdStatus').html(lblStatus);
 
                 if (tableInfo.rowCount == 0 || tableInfo.dataLength > 512 * 1024 * 1024) {
                     $('#divInfo').find('#btnProfiling').addClass('disabled').attr('title', 'No data or too large.');
