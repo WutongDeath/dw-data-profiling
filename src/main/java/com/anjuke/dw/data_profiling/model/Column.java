@@ -9,7 +9,7 @@ public class Column {
     private String type;
     private Integer typeFlag;
     private String stats;
-    private String comment;
+    private String comment = "";
     private Date updated;
     public Integer getId() {
         return id;

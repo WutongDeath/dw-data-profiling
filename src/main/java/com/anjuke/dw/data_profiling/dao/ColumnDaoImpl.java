@@ -13,7 +13,7 @@ import com.anjuke.dw.data_profiling.model.Column;
 
 public class ColumnDaoImpl extends JdbcDaoSupport implements ColumnDao {
 
-    private static String UPDATE_FIELDS = "table_id, name, type, type_flag, stats";
+    private static String UPDATE_FIELDS = "table_id, name, type, type_flag, stats, comment";
     private static String SELECT_FIELDS = "id, updated, " + UPDATE_FIELDS;
 
     @Override
@@ -56,12 +56,13 @@ public class ColumnDaoImpl extends JdbcDaoSupport implements ColumnDao {
     public Integer insert(Column column) throws DataAccessException {
 
         int rows = getJdbcTemplate().update(
-                "INSERT INTO dp_column (" + UPDATE_FIELDS + ") VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO dp_column (" + UPDATE_FIELDS + ") VALUES (?, ?, ?, ?, ?, ?)",
                 column.getTableId(),
                 column.getName(),
                 column.getType(),
                 column.getTypeFlag(),
-                column.getStats());
+                column.getStats(),
+                column.getComment());
 
         if (rows == 0) {
             return null;
@@ -80,12 +81,13 @@ public class ColumnDaoImpl extends JdbcDaoSupport implements ColumnDao {
     @Override
     public boolean update(Column column) throws DataAccessException {
         return getJdbcTemplate().update(
-                "UPDATE dp_column SET name = ?, type = ?, type_flag = ?, stats = ?"
+                "UPDATE dp_column SET name = ?, type = ?, type_flag = ?, stats = ?, comment = ?"
                 + " WHERE id = ?",
                 column.getName(),
                 column.getType(),
                 column.getTypeFlag(),
                 column.getStats(),
+                column.getComment(),
                 column.getId()) > 0;
     }
 

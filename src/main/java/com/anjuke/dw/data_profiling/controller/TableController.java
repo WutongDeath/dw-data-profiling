@@ -98,6 +98,7 @@ public class TableController {
         model.put("columnName", c.getName());
         model.put("columnType", c.getType());
         model.put("typeFlag", c.getTypeFlag());
+        model.put("comment", c.getComment());
         model.put("updated", c.getUpdated() == null ? "-" : dfDatetime.format(c.getUpdated()));
 
         List<String> typeFlagString = new ArrayList<String>();
