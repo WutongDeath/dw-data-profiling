@@ -236,6 +236,7 @@ public class TableController {
         tableInfo.put("rowCount", table.getRowCount());
         tableInfo.put("dataLength", table.getDataLength());
         tableInfo.put("status", table.getStatus());
+        tableInfo.put("progress", table.getProgress());
         tableInfo.put("updated", table.getUpdated() == null ? "-" : dfDatetime.format(table.getUpdated()));
 
         List<Map<String, Object>> columnArray = new ArrayList<Map<String, Object>>();
@@ -375,6 +376,7 @@ public class TableController {
             table.setRowCount(tableNew.getRowCount());
             table.setDataLength(tableNew.getDataLength());
             table.setStatus(Table.STATUS_NEW);
+            table.setProgress(0);
             if (!tableDao.update(table)) {
                 return Functions.output("error", "fail to update table");
             }

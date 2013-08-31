@@ -82,7 +82,7 @@ new TableList({
           <td>{{columnCount}}</td>
           <td>{{rowCount}}</td>
           <td>{{dataLength}}</td>
-          <td><span class="label" id="lblStatus"></span></td>
+          <td id="tdStatus"></td>
           <td>{{updated}}</td>
           <td>
             <a href="javascript:void(0);" class="btn btn-small" id="btnProfiling">Profiling</a>

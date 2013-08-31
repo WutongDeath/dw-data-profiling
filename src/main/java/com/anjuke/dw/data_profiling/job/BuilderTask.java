@@ -127,6 +127,7 @@ public class BuilderTask implements Runnable {
         }
 
         List<String> errorColumns = new ArrayList<String>();
+        int numProcessed = 0;
         for (Column column : columnList) {
             try {
                 processColumn(column);
@@ -134,6 +135,8 @@ public class BuilderTask implements Runnable {
                 logger.error("Fail to process column: " + column.getName(), e);
                 errorColumns.add(column.getName());
             }
+            table.setProgress(++numProcessed * 100 / columnList.size());
+            tableDao.update(table);
         }
 
         if (errorColumns.size() > 0) {
