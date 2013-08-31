@@ -188,7 +188,7 @@ public class MetaService {
             table.setDataLength(rs.getLong("data_length"));
 
             stmt = conn.prepareStatement(
-                    "SELECT column_name, column_type FROM columns"
+                    "SELECT column_name, column_type, column_comment FROM columns"
                     + " WHERE table_schema = ? AND table_name = ?");
             stmt.setString(1, database.getName());
             stmt.setString(2, tableName);
@@ -200,6 +200,7 @@ public class MetaService {
                 column.setType(rs.getString("column_type"));
                 column.setTypeFlag(Functions.parseTypeFlag(column.getType()));
                 column.setStats("");
+                column.setComment(rs.getString("column_comment"));
                 columnList.add(column);
             }
 

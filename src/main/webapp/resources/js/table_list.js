@@ -124,6 +124,16 @@ TableList.prototype = {
 
             $('#divInfo').html(self.tplInfo(tableInfo));
 
+            $('#divInfo').find('span[comment]').each(function() {
+            	if ($(this).attr('title')) {
+            		$(this).tooltip();
+            		$(this).css({
+            			'border-bottom': '1px dashed black',
+            			'cursor': 'pointer'
+            		});
+            	}
+            });
+
             $('#divInfo').find('a[back]').click(function() {
                 $('#divTables').show();
                 $('#divInfo').hide();
@@ -218,7 +228,6 @@ TableList.prototype = {
 	                		        + columnInfo.datetimeStats.bottom10[i+1] + '<br>';
 	                	}
                 	}
-
 
                 	$('#dlgDetails h3').text('Column: ' + columnInfo.columnName);
                 	$('#dlgDetails .modal-body').html(self.tplDetails(columnInfo));
