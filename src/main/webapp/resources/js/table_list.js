@@ -130,14 +130,11 @@ TableList.prototype = {
                 return;
             }
 
-            self.renderInfo(tableInfo);
-
-            $('#divTables').hide();
-            $('#divInfo').show();
+            self.renderTable(tableInfo);
         });
     },
 
-    renderInfo: function(tableInfo) {
+    renderTable: function(tableInfo) {
         var self = this;
 
         $('#divInfo').html(self.tplInfo(tableInfo));
@@ -237,56 +234,102 @@ TableList.prototype = {
                     return;
                 }
 
-                columnInfo.rowCount = tableInfo.rowCount;
-
-                var typeFlag = parseInt(columnInfo.typeFlag);
-                columnInfo.hasNumericStats = (typeFlag & 1) == 1 && !$.isEmptyObject(columnInfo.numericStats);
-                if (columnInfo.hasNumericStats) {
-                    columnInfo.numericStats.top10String = '';
-                    for (var i = 0; i < columnInfo.numericStats.top10.length; i += 2) {
-                        columnInfo.numericStats.top10String += columnInfo.numericStats.top10[i] + ': '
-                                + columnInfo.numericStats.top10[i+1] + '<br>';
-                    }
-                    columnInfo.numericStats.bottom10String = '';
-                    for (var i = 0; i < columnInfo.numericStats.bottom10.length; i += 2) {
-                        columnInfo.numericStats.bottom10String += columnInfo.numericStats.bottom10[i] + ': '
-                                + columnInfo.numericStats.bottom10[i+1] + '<br>';
-                    }
-                }
-
-                columnInfo.hasStringStats = (typeFlag & 2) == 2 && !$.isEmptyObject(columnInfo.stringStats);
-                if (columnInfo.hasStringStats) {
-                    columnInfo.stringStats.top10String = '';
-                    for (var i = 0; i < columnInfo.stringStats.top10.length; i += 2) {
-                        columnInfo.stringStats.top10String += columnInfo.stringStats.top10[i] + ': '
-                                + columnInfo.stringStats.top10[i+1] + '<br>';
-                    }
-                    columnInfo.stringStats.bottom10String = '';
-                    for (var i = 0; i < columnInfo.stringStats.bottom10.length; i += 2) {
-                        columnInfo.stringStats.bottom10String += columnInfo.stringStats.bottom10[i] + ': '
-                                + columnInfo.stringStats.bottom10[i+1] + '<br>';
-                    }
-                }
-
-                columnInfo.hasDatetimeStats = (typeFlag & 4) == 4 && !$.isEmptyObject(columnInfo.datetimeStats);
-                if (columnInfo.hasDatetimeStats) {
-                    columnInfo.datetimeStats.top10String = '';
-                    for (var i = 0; i < columnInfo.datetimeStats.top10.length; i += 2) {
-                        columnInfo.datetimeStats.top10String += columnInfo.datetimeStats.top10[i] + ': '
-                                + columnInfo.datetimeStats.top10[i+1] + '<br>';
-                    }
-                    columnInfo.datetimeStats.bottom10String = '';
-                    for (var i = 0; i < columnInfo.datetimeStats.bottom10.length; i += 2) {
-                        columnInfo.datetimeStats.bottom10String += columnInfo.datetimeStats.bottom10[i] + ': '
-                                + columnInfo.datetimeStats.bottom10[i+1] + '<br>';
-                    }
-                }
-
-                $('#dlgDetails h3').text('Column: ' + columnInfo.columnName);
-                $('#dlgDetails .modal-body').html(self.tplDetails(columnInfo));
-                $('#dlgDetails').modal('show');
+                self.renderColumn(tableInfo, columnInfo);
             });
         });
+
+        $('#divTables').hide();
+        $('#divInfo').show();
+    },
+
+    renderColumn: function(tableInfo, columnInfo) {
+        var self = this;
+
+        columnInfo.rowCount = tableInfo.rowCount;
+
+        var typeFlag = parseInt(columnInfo.typeFlag);
+        columnInfo.hasNumericStats = (typeFlag & 1) == 1 && !$.isEmptyObject(columnInfo.numericStats);
+        if (columnInfo.hasNumericStats) {
+            var top10 = columnInfo.numericStats.top10;
+            var data = [];
+            var sum = 0;
+            for (var i = 0; i < top10.length; i += 2) {
+                data.push([top10[i], top10[i + 1]]);
+                sum += top10[i + 1];
+            }
+            data.push({
+                name: 'Other',
+                y: columnInfo.rowCount - sum,
+                color: 'silver'
+            });
+            columnInfo.numericStats.top10Data = data;
+
+            columnInfo.numericStats.bottom10String = '';
+            for (var i = 0; i < columnInfo.numericStats.bottom10.length; i += 2) {
+                columnInfo.numericStats.bottom10String += columnInfo.numericStats.bottom10[i] + ': '
+                        + columnInfo.numericStats.bottom10[i+1] + ', ';
+            }
+        }
+
+        columnInfo.hasStringStats = (typeFlag & 2) == 2 && !$.isEmptyObject(columnInfo.stringStats);
+        if (columnInfo.hasStringStats) {
+            columnInfo.stringStats.top10String = '';
+            for (var i = 0; i < columnInfo.stringStats.top10.length; i += 2) {
+                columnInfo.stringStats.top10String += columnInfo.stringStats.top10[i] + ': '
+                        + columnInfo.stringStats.top10[i+1] + '<br>';
+            }
+            columnInfo.stringStats.bottom10String = '';
+            for (var i = 0; i < columnInfo.stringStats.bottom10.length; i += 2) {
+                columnInfo.stringStats.bottom10String += columnInfo.stringStats.bottom10[i] + ': '
+                        + columnInfo.stringStats.bottom10[i+1] + '<br>';
+            }
+        }
+
+        columnInfo.hasDatetimeStats = (typeFlag & 4) == 4 && !$.isEmptyObject(columnInfo.datetimeStats);
+        if (columnInfo.hasDatetimeStats) {
+            columnInfo.datetimeStats.top10String = '';
+            for (var i = 0; i < columnInfo.datetimeStats.top10.length; i += 2) {
+                columnInfo.datetimeStats.top10String += columnInfo.datetimeStats.top10[i] + ': '
+                        + columnInfo.datetimeStats.top10[i+1] + '<br>';
+            }
+            columnInfo.datetimeStats.bottom10String = '';
+            for (var i = 0; i < columnInfo.datetimeStats.bottom10.length; i += 2) {
+                columnInfo.datetimeStats.bottom10String += columnInfo.datetimeStats.bottom10[i] + ': '
+                        + columnInfo.datetimeStats.bottom10[i+1] + '<br>';
+            }
+        }
+
+        $('#dlgDetails h3').text('Column: ' + columnInfo.columnName);
+        $('#dlgDetails .modal-body').html(self.tplDetails(columnInfo));
+
+        // chart
+        if (columnInfo.hasNumericStats) {
+            $('#divNumericTop10').highcharts({
+                title: {
+                    text: 'Top 10 Values'
+                },
+                tooltip:  {
+                    enabled: false
+                },
+                credits: {
+                    enabled: false
+                },
+                plotOptions: {
+                    pie: {
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.percentage:.2f} %'
+                        }
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    data: columnInfo.numericStats.top10Data
+                }]
+            });
+        }
+
+        $('#dlgDetails').modal('show');
     },
 
     initSearch: function() {

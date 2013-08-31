@@ -8,6 +8,7 @@
 </jsp:attribute>
 
 <jsp:attribute name="scripts">
+<script type="text/javascript" src="<c:url value="/webjars/highcharts/3.0.1/highcharts.js" />"></script>
 <script type="text/javascript" src="<c:url value="/webjars/handlebars/1.0.0/handlebars.min.js" />"></script>
 <script type="text/javascript" src="<c:url value="/resources/js/table_list.js" />"></script>
 <script type="text/javascript">
@@ -169,14 +170,8 @@ new TableList({
         <td>{{numericStats.avg}}</td>
         <td>{{numericStats.sd}}</td>
       </tr>
-      <tr>
-        <th colspan="2">Top 10</th>
-        <th colspan="2">Bottom 10</th>
-      </tr>
-      <tr>
-        <td colspan="2">{{{numericStats.top10String}}}</td>
-        <td colspan="2">{{{numericStats.bottom10String}}}</td>
-      </tr>
+      <tr><td colspan="4"><div id="divNumericTop10" style="width: 480px; height: 300px;"></div></td></tr>
+      <tr><th>Bottom 10</th><td colspan="3">{{numericStats.bottom10String}}</td></tr>
     </table>
     {{/if}}
 
