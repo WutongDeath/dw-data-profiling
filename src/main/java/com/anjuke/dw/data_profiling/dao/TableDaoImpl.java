@@ -20,7 +20,7 @@ import com.anjuke.dw.data_profiling.util.Functions;
 
 public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
 
-    private static String INSERT_FIELDS = "database_id, name, status, column_count, row_count, data_length";
+    private static String INSERT_FIELDS = "database_id, name, status, progress, column_count, row_count, data_length";
     private static String SELECT_FIELDS = "id, updated, " + INSERT_FIELDS;
 
     @Override
@@ -51,6 +51,7 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
             table.setDatabaseId(rs.getInt("database_id"));
             table.setName(rs.getString("name"));
             table.setStatus(rs.getInt("status"));
+            table.setProgress(rs.getInt("progress"));
             table.setColumnCount(rs.getInt("column_count"));
             table.setRowCount(rs.getLong("row_count"));
             table.setDataLength(rs.getLong("data_length"));
@@ -78,14 +79,15 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
             public PreparedStatement createPreparedStatement(Connection con)
                     throws SQLException {
                 PreparedStatement ps = con.prepareStatement(
-                        "INSERT INTO dp_table (" + INSERT_FIELDS + ") VALUES (?, ?, ?, ?, ?, ?)",
+                        "INSERT INTO dp_table (" + INSERT_FIELDS + ") VALUES (?, ?, ?, ?, ?, ?, ?)",
                         new String[] { "id" });
                 ps.setInt(1, table.getDatabaseId());
                 ps.setString(2, table.getName());
                 ps.setInt(3, table.getStatus());
-                ps.setInt(4, table.getColumnCount());
-                ps.setLong(5, table.getRowCount());
-                ps.setLong(6, table.getDataLength());
+                ps.setInt(4, table.getProgress());
+                ps.setInt(5, table.getColumnCount());
+                ps.setLong(6, table.getRowCount());
+                ps.setLong(7, table.getDataLength());
                 return ps;
             }
 
@@ -139,9 +141,10 @@ public class TableDaoImpl extends JdbcDaoSupport implements TableDao {
     @Override
     public boolean update(Table table) throws DataAccessException {
         return getJdbcTemplate().update(
-                "UPDATE dp_table SET status = ?, column_count = ?, row_count = ?, data_length = ?"
+                "UPDATE dp_table SET status = ?, progress = ?, column_count = ?, row_count = ?, data_length = ?"
                 + " WHERE id = ?",
                 table.getStatus(),
+                table.getProgress(),
                 table.getColumnCount(),
                 table.getRowCount(),
                 table.getDataLength(),

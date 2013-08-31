@@ -11,6 +11,7 @@ public class Table {
     private Integer databaseId;
     private String name;
     private Integer status;
+    private Integer progress = 0;
     private Integer columnCount;
     private Long rowCount;
     private Long dataLength;
@@ -38,6 +39,12 @@ public class Table {
     }
     public void setStatus(Integer status) {
         this.status = status;
+    }
+    public Integer getProgress() {
+        return progress;
+    }
+    public void setProgress(Integer progress) {
+        this.progress = progress;
     }
     public Integer getColumnCount() {
         return columnCount;

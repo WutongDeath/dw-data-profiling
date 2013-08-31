@@ -125,13 +125,13 @@ TableList.prototype = {
             $('#divInfo').html(self.tplInfo(tableInfo));
 
             $('#divInfo').find('span[comment]').each(function() {
-            	if ($(this).attr('title')) {
-            		$(this).tooltip();
-            		$(this).css({
-            			'border-bottom': '1px dashed black',
-            			'cursor': 'pointer'
-            		});
-            	}
+                if ($(this).attr('title')) {
+                    $(this).tooltip();
+                    $(this).css({
+                        'border-bottom': '1px dashed black',
+                        'cursor': 'pointer'
+                    });
+                }
             });
 
             $('#divInfo').find('a[back]').click(function() {
@@ -145,7 +145,7 @@ TableList.prototype = {
 
             if (tableInfo.status == 1) { // processing
 
-                $('#divInfo').find('#lblStatus').addClass('label-info').text('Processing');
+                $('#divInfo').find('#lblStatus').addClass('label-info').text(tableInfo.progress + '%');
                 $('#divInfo').find('#btnProfiling').addClass('disabled');
 
             } else {
@@ -159,79 +159,79 @@ TableList.prototype = {
                 }
 
                 if (tableInfo.rowCount == 0 || tableInfo.dataLength > 512 * 1024 * 1024) {
-                	$('#divInfo').find('#btnProfiling').addClass('disabled').attr('title', 'No data or too large.');
+                    $('#divInfo').find('#btnProfiling').addClass('disabled').attr('title', 'No data or too large.');
                 } else {
-	                $('#divInfo').find('#btnProfiling').click(function() {
-	                    $.post(self.contextPath + '/table/start_profiling/', data, function(result) {
-	                        if (result.status == 'ok') {
-	                            self.refreshInfo(tableName);
-	                        } else {
-	                            alert(result.msg);
-	                        }
-	                    }, 'json');
-	                });
+                    $('#divInfo').find('#btnProfiling').click(function() {
+                        $.post(self.contextPath + '/table/start_profiling/', data, function(result) {
+                            if (result.status == 'ok') {
+                                self.refreshInfo(tableName);
+                            } else {
+                                alert(result.msg);
+                            }
+                        }, 'json');
+                    });
                 }
             }
 
             $('#divInfo').find('a[details]').click(function() {
-            	var data = {
-            		columnId: $(this).attr('details')
-            	};
+                var data = {
+                    columnId: $(this).attr('details')
+                };
                 $.getJSON(self.contextPath + '/table/get_column_details/', data, function(columnInfo) {
 
-                	if ($.isEmptyObject(columnInfo)) {
-                		alert('Fail to get column details.');
-                		return;
-                	}
+                    if ($.isEmptyObject(columnInfo)) {
+                        alert('Fail to get column details.');
+                        return;
+                    }
 
-                	columnInfo.rowCount = tableInfo.rowCount;
+                    columnInfo.rowCount = tableInfo.rowCount;
 
-                	var typeFlag = parseInt(columnInfo.typeFlag);
-                	columnInfo.hasNumericStats = (typeFlag & 1) == 1 && !$.isEmptyObject(columnInfo.numericStats);
-                	if (columnInfo.hasNumericStats) {
-	                	columnInfo.numericStats.top10String = '';
-	                	for (var i = 0; i < columnInfo.numericStats.top10.length; i += 2) {
-	                		columnInfo.numericStats.top10String += columnInfo.numericStats.top10[i] + ': '
-	                		        + columnInfo.numericStats.top10[i+1] + '<br>';
-	                	}
-	                	columnInfo.numericStats.bottom10String = '';
-	                	for (var i = 0; i < columnInfo.numericStats.bottom10.length; i += 2) {
-	                		columnInfo.numericStats.bottom10String += columnInfo.numericStats.bottom10[i] + ': '
-	                		        + columnInfo.numericStats.bottom10[i+1] + '<br>';
-	                	}
-                	}
+                    var typeFlag = parseInt(columnInfo.typeFlag);
+                    columnInfo.hasNumericStats = (typeFlag & 1) == 1 && !$.isEmptyObject(columnInfo.numericStats);
+                    if (columnInfo.hasNumericStats) {
+                        columnInfo.numericStats.top10String = '';
+                        for (var i = 0; i < columnInfo.numericStats.top10.length; i += 2) {
+                            columnInfo.numericStats.top10String += columnInfo.numericStats.top10[i] + ': '
+                                    + columnInfo.numericStats.top10[i+1] + '<br>';
+                        }
+                        columnInfo.numericStats.bottom10String = '';
+                        for (var i = 0; i < columnInfo.numericStats.bottom10.length; i += 2) {
+                            columnInfo.numericStats.bottom10String += columnInfo.numericStats.bottom10[i] + ': '
+                                    + columnInfo.numericStats.bottom10[i+1] + '<br>';
+                        }
+                    }
 
-                	columnInfo.hasStringStats = (typeFlag & 2) == 2 && !$.isEmptyObject(columnInfo.stringStats);
-                	if (columnInfo.hasStringStats) {
-                		columnInfo.stringStats.top10String = '';
-	                	for (var i = 0; i < columnInfo.stringStats.top10.length; i += 2) {
-	                		columnInfo.stringStats.top10String += columnInfo.stringStats.top10[i] + ': '
-	                		        + columnInfo.stringStats.top10[i+1] + '<br>';
-	                	}
-	                	columnInfo.stringStats.bottom10String = '';
-	                	for (var i = 0; i < columnInfo.stringStats.bottom10.length; i += 2) {
-	                		columnInfo.stringStats.bottom10String += columnInfo.stringStats.bottom10[i] + ': '
-	                		        + columnInfo.stringStats.bottom10[i+1] + '<br>';
-	                	}
-                	}
+                    columnInfo.hasStringStats = (typeFlag & 2) == 2 && !$.isEmptyObject(columnInfo.stringStats);
+                    if (columnInfo.hasStringStats) {
+                        columnInfo.stringStats.top10String = '';
+                        for (var i = 0; i < columnInfo.stringStats.top10.length; i += 2) {
+                            columnInfo.stringStats.top10String += columnInfo.stringStats.top10[i] + ': '
+                                    + columnInfo.stringStats.top10[i+1] + '<br>';
+                        }
+                        columnInfo.stringStats.bottom10String = '';
+                        for (var i = 0; i < columnInfo.stringStats.bottom10.length; i += 2) {
+                            columnInfo.stringStats.bottom10String += columnInfo.stringStats.bottom10[i] + ': '
+                                    + columnInfo.stringStats.bottom10[i+1] + '<br>';
+                        }
+                    }
 
-                	columnInfo.hasDatetimeStats = (typeFlag & 4) == 4 && !$.isEmptyObject(columnInfo.datetimeStats);
-                	if (columnInfo.hasDatetimeStats) {
-                		columnInfo.datetimeStats.top10String = '';
-	                	for (var i = 0; i < columnInfo.datetimeStats.top10.length; i += 2) {
-	                		columnInfo.datetimeStats.top10String += columnInfo.datetimeStats.top10[i] + ': '
-	                		        + columnInfo.datetimeStats.top10[i+1] + '<br>';
-	                	}
-	                	columnInfo.datetimeStats.bottom10String = '';
-	                	for (var i = 0; i < columnInfo.datetimeStats.bottom10.length; i += 2) {
-	                		columnInfo.datetimeStats.bottom10String += columnInfo.datetimeStats.bottom10[i] + ': '
-	                		        + columnInfo.datetimeStats.bottom10[i+1] + '<br>';
-	                	}
-                	}
+                    columnInfo.hasDatetimeStats = (typeFlag & 4) == 4 && !$.isEmptyObject(columnInfo.datetimeStats);
+                    if (columnInfo.hasDatetimeStats) {
+                        columnInfo.datetimeStats.top10String = '';
+                        for (var i = 0; i < columnInfo.datetimeStats.top10.length; i += 2) {
+                            columnInfo.datetimeStats.top10String += columnInfo.datetimeStats.top10[i] + ': '
+                                    + columnInfo.datetimeStats.top10[i+1] + '<br>';
+                        }
+                        columnInfo.datetimeStats.bottom10String = '';
+                        for (var i = 0; i < columnInfo.datetimeStats.bottom10.length; i += 2) {
+                            columnInfo.datetimeStats.bottom10String += columnInfo.datetimeStats.bottom10[i] + ': '
+                                    + columnInfo.datetimeStats.bottom10[i+1] + '<br>';
+                        }
+                    }
 
-                	$('#dlgDetails h3').text('Column: ' + columnInfo.columnName);
-                	$('#dlgDetails .modal-body').html(self.tplDetails(columnInfo));
-                	$('#dlgDetails').modal('show');
+                    $('#dlgDetails h3').text('Column: ' + columnInfo.columnName);
+                    $('#dlgDetails .modal-body').html(self.tplDetails(columnInfo));
+                    $('#dlgDetails').modal('show');
                 });
             });
 

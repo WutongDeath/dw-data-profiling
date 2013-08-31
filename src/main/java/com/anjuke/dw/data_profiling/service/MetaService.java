@@ -184,6 +184,7 @@ public class MetaService {
             table.setDatabaseId(database.getId());
             table.setName(tableName);
             table.setStatus(Table.STATUS_UNKNOWN);
+            table.setProgress(0);
             table.setRowCount(rs.getLong("table_rows"));
             table.setDataLength(rs.getLong("data_length"));
 
