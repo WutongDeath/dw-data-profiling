@@ -164,6 +164,8 @@ TableList.prototype = {
             if (self.currentTableName != tableInfo.tableName) {
                 return false;
             }
+            clearTimeout(self.refreshHandler);
+            self.refreshHandler = null;
             self.refreshInfo(tableInfo.tableName);
         });
 
