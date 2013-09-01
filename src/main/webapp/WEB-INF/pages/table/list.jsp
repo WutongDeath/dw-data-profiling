@@ -171,7 +171,7 @@ new TableList({
         <td>{{numericStats.sd}}</td>
       </tr>
       <tr><td colspan="4"><div id="divNumericTop10" style="width: 480px; height: 300px;"></div></td></tr>
-      <tr><th>Bottom 10</th><td colspan="3">{{numericStats.bottom10String}}</td></tr>
+      <tr><th>Bottom 10</th><td colspan="3"><div id="divNumericBottom10"></div></td></tr>
     </table>
     {{/if}}
 
@@ -190,14 +190,8 @@ new TableList({
         <td>{{stringStats.avgLength}}</td>
         <td>&nbsp;</td>
       </tr>
-      <tr>
-        <th colspan="2">Top 10</th>
-        <th colspan="2">Bottom 10</th>
-      </tr>
-      <tr>
-        <td colspan="2">{{{stringStats.top10String}}}</td>
-        <td colspan="2">{{{stringStats.bottom10String}}}</td>
-      </tr>
+      <tr><td colspan="4"><div id="divStringTop10" style="width: 480px; height: 300px;"></div></td></tr>
+      <tr><th>Bottom 10</th><td colspan="3"><div id="divStringBottom10"></div></td></tr>
     </table>
     {{/if}}
 
@@ -224,14 +218,8 @@ new TableList({
         <td>{{datetimeStats.minTime}}</td>
         <td>{{datetimeStats.maxTime}}</td>
       </tr>
-      <tr>
-        <th colspan="2">Top 10</th>
-        <th colspan="2">Bottom 10</th>
-      </tr>
-      <tr>
-        <td colspan="2">{{{datetimeStats.top10String}}}</td>
-        <td colspan="2">{{{datetimeStats.bottom10String}}}</td>
-      </tr>
+      <tr><td colspan="4"><div id="divDatetimeTop10" style="width: 480px; height: 300px;"></div></td></tr>
+      <tr><th>Bottom 10</th><td colspan="3"><div id="divDatetimeBottom10"></div></td></tr>
     </table>
     {{/if}}
     </script>

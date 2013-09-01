@@ -249,8 +249,21 @@ TableList.prototype = {
 
         var typeFlag = parseInt(columnInfo.typeFlag);
         columnInfo.hasNumericStats = (typeFlag & 1) == 1 && !$.isEmptyObject(columnInfo.numericStats);
-        if (columnInfo.hasNumericStats) {
-            var top10 = columnInfo.numericStats.top10;
+        columnInfo.hasStringStats = (typeFlag & 2) == 2 && !$.isEmptyObject(columnInfo.stringStats);
+        columnInfo.hasDatetimeStats = (typeFlag & 4) == 4 && !$.isEmptyObject(columnInfo.datetimeStats);
+
+        $('#dlgDetails h3').text('Column: ' + columnInfo.columnName);
+        $('#dlgDetails .modal-body').html(self.tplDetails(columnInfo));
+
+        $.each(['numeric', 'string', 'datetime'], function() {
+
+            if (!columnInfo['has' + self.capitalize(this) + 'Stats']) {
+                return;
+            }
+
+            var stats = columnInfo[this + 'Stats'];
+
+            var top10 = stats.top10;
             var data = [];
             var sum = 0;
             for (var i = 0; i < top10.length; i += 2) {
@@ -262,49 +275,9 @@ TableList.prototype = {
                 y: columnInfo.rowCount - sum,
                 color: 'silver'
             });
-            columnInfo.numericStats.top10Data = data;
+            stats.top10Data = data;
 
-            columnInfo.numericStats.bottom10String = '';
-            for (var i = 0; i < columnInfo.numericStats.bottom10.length; i += 2) {
-                columnInfo.numericStats.bottom10String += columnInfo.numericStats.bottom10[i] + ': '
-                        + columnInfo.numericStats.bottom10[i+1] + ', ';
-            }
-        }
-
-        columnInfo.hasStringStats = (typeFlag & 2) == 2 && !$.isEmptyObject(columnInfo.stringStats);
-        if (columnInfo.hasStringStats) {
-            columnInfo.stringStats.top10String = '';
-            for (var i = 0; i < columnInfo.stringStats.top10.length; i += 2) {
-                columnInfo.stringStats.top10String += columnInfo.stringStats.top10[i] + ': '
-                        + columnInfo.stringStats.top10[i+1] + '<br>';
-            }
-            columnInfo.stringStats.bottom10String = '';
-            for (var i = 0; i < columnInfo.stringStats.bottom10.length; i += 2) {
-                columnInfo.stringStats.bottom10String += columnInfo.stringStats.bottom10[i] + ': '
-                        + columnInfo.stringStats.bottom10[i+1] + '<br>';
-            }
-        }
-
-        columnInfo.hasDatetimeStats = (typeFlag & 4) == 4 && !$.isEmptyObject(columnInfo.datetimeStats);
-        if (columnInfo.hasDatetimeStats) {
-            columnInfo.datetimeStats.top10String = '';
-            for (var i = 0; i < columnInfo.datetimeStats.top10.length; i += 2) {
-                columnInfo.datetimeStats.top10String += columnInfo.datetimeStats.top10[i] + ': '
-                        + columnInfo.datetimeStats.top10[i+1] + '<br>';
-            }
-            columnInfo.datetimeStats.bottom10String = '';
-            for (var i = 0; i < columnInfo.datetimeStats.bottom10.length; i += 2) {
-                columnInfo.datetimeStats.bottom10String += columnInfo.datetimeStats.bottom10[i] + ': '
-                        + columnInfo.datetimeStats.bottom10[i+1] + '<br>';
-            }
-        }
-
-        $('#dlgDetails h3').text('Column: ' + columnInfo.columnName);
-        $('#dlgDetails .modal-body').html(self.tplDetails(columnInfo));
-
-        // chart
-        if (columnInfo.hasNumericStats) {
-            $('#divNumericTop10').highcharts({
+            $('#dlgDetails #div' + self.capitalize(this) + 'Top10').highcharts({
                 title: {
                     text: 'Top 10 Values'
                 },
@@ -324,10 +297,17 @@ TableList.prototype = {
                 },
                 series: [{
                     type: 'pie',
-                    data: columnInfo.numericStats.top10Data
+                    data: stats.top10Data
                 }]
             });
-        }
+
+            var bottom10 = stats.bottom10;
+            var arr = [];
+            for (var i = 0; i < bottom10.length; i += 2) {
+                arr.push('<b>' + bottom10[i] + '</b>: ' + bottom10[i + 1]);
+            }
+            $('#dlgDetails #div' + self.capitalize(this) + 'Bottom10').html(arr.join(', '));
+        });
 
         $('#dlgDetails').modal('show');
     },
@@ -369,6 +349,10 @@ TableList.prototype = {
         self.currentPage = 1;
         self.totalPage = Math.ceil(self.currentList.length / self.perPage);
         self.refreshList();
+    },
+
+    capitalize: function(s) {
+        return s.substr(0, 1).toUpperCase() + s.substr(1);
     },
 
     _theEnd: undefined
