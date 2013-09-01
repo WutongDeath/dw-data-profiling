@@ -263,7 +263,7 @@ public class BuilderTask implements Runnable {
             datetimeStats.put("max_time", dfTime.format(result.getTime(6)));
 
             stmt = conn.prepareStatement(
-                    String.format("SELECT DATE(%s), COUNT(*) FROM %s GROUP BY DATE(%s) ORDER BY COUNT(*) DESC LIMIT 10",
+                    String.format("SELECT %s, COUNT(*) FROM %s GROUP BY %s ORDER BY COUNT(*) DESC LIMIT 10",
                             column.getName(), table.getName(), column.getName()));
             result = stmt.executeQuery();
             List<Object> datetimeTop10 = new ArrayList<Object>();
@@ -274,7 +274,7 @@ public class BuilderTask implements Runnable {
             datetimeStats.put("top10", datetimeTop10);
 
             stmt = conn.prepareStatement(
-                    String.format("SELECT DATE(%s), COUNT(*) FROM %s GROUP BY DATE(%s) ORDER BY COUNT(*) LIMIT 10",
+                    String.format("SELECT %s, COUNT(*) FROM %s GROUP BY %s ORDER BY COUNT(*) LIMIT 10",
                             column.getName(), table.getName(), column.getName()));
             result = stmt.executeQuery();
             List<Object> datetimeBottom10 = new ArrayList<Object>();
