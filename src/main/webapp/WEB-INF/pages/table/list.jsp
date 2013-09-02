@@ -92,7 +92,7 @@ new TableList({
       </table>
 
       <h2 class="sub-title">Column Information</h2>
-      <table class="table">
+      <table class="table table-hover">
         <tr>
           <th valign="center">#</th>
           <th>Column Name</th>
